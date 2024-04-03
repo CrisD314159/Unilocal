@@ -1,9 +1,16 @@
-package co.edu.uniquindio.proyecto.model;
+package co.edu.uniquindio.proyecto.model.documents;
 
+import co.edu.uniquindio.proyecto.model.entities.Coordenada;
+import co.edu.uniquindio.proyecto.model.entities.Horario;
+import co.edu.uniquindio.proyecto.model.entities.Imagen;
+import co.edu.uniquindio.proyecto.model.entities.Revision;
+import co.edu.uniquindio.proyecto.model.enums.Categoria;
+import co.edu.uniquindio.proyecto.model.enums.EstadoLugar;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 @Document
@@ -13,10 +20,10 @@ import java.util.ArrayList;
 @ToString
 @Getter
 @Setter
-public class Lugar {
+public class Lugar implements Serializable {
     @Id
     private String codigo;
-    private ArrayList<String> imagenes;
+    private ArrayList<Imagen> imagenes;
     private String descripcion;
     private String nombre;
     private ArrayList<String> telefonos;
@@ -24,9 +31,9 @@ public class Lugar {
     private Coordenada ubicacion;
     private Usuario usuario;
     private ArrayList<Comentario> comentarios;
-
-    private ArrayList<Estado> listaEstados;
+    private ArrayList<Revision> listaRevisiones;
     private EstadoLugar estadoLugar;
     private ArrayList<Horario> horarios;
+    private String idUsuario;
 
 }

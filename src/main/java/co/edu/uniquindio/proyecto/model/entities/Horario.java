@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.model;
+package co.edu.uniquindio.proyecto.model.entities;
 
 import lombok.*;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 public class Horario {
-    private ArrayList<String> dias;
+    private String dia;
     private String horaApertura;
     private String horaCierre;
 

@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.model;
+package co.edu.uniquindio.proyecto.model.entities;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @ToString
 @Getter
 @Setter
-public class Cuenta {
+public abstract class Cuenta {
     private String codigo;
     private String email;
     private String username;
