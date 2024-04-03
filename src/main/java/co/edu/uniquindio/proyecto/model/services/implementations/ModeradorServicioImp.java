@@ -13,10 +13,14 @@ import co.edu.uniquindio.proyecto.model.services.interfaces.ModeradorServicio;
 import co.edu.uniquindio.proyecto.repositorios.LugarRepo;
 import co.edu.uniquindio.proyecto.repositorios.ModeradorRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
+import co.edu.uniquindio.proyecto.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,6 +33,7 @@ public class ModeradorServicioImp implements ModeradorServicio {
     private final UsuarioRepo usuarioRepo;
     private final EmailServicioImp emailServicioImp;
     private final UsuarioServicioImp usuarioServicioImp;
+    private final JWTUtils jwtUtils;
     @Override
     public boolean eliminarCuenta(String idUsuario) throws Exception {
         Optional<Moderador> moderadorOptional = moderadorRepo.findById(idUsuario);
@@ -67,7 +72,20 @@ public class ModeradorServicioImp implements ModeradorServicio {
 
     @Override
     public TokenDTO iniciarSesion(LoginDTO loginDTO) throws Exception {
-        return false;
+        Optional<Moderador> clienteOptional = moderadorRepo.findByEmail(loginDTO.correo());
+        if (clienteOptional.isEmpty()) {
+            throw new Exception("El correo no se encuentra registrado");
+        }
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        Moderador moderador = clienteOptional.get();
+        if( !passwordEncoder.matches(loginDTO.contrasenia(), moderador.getPassword()) ) {
+            throw new Exception("La contraseña es incorrecta");
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("rol", "CLIENTE");
+        map.put("nombre", moderador.getNombre());
+        map.put("id", moderador.getCodigo());
+        return new TokenDTO( jwtUtils.generarToken(moderador.getEmail(), map) );
     }
 
     @Override
