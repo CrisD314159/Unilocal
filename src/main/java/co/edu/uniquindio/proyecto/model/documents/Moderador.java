@@ -20,5 +20,4 @@ public class Moderador extends Cuenta implements Serializable {
     @EqualsAndHashCode.Include
     private String codigo;
     private String nombre;
-    private EstadoRegistro registro;
 }

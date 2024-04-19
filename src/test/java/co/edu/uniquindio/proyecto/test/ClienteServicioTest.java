@@ -29,13 +29,13 @@ public class ClienteServicioTest {
         InputStream inputStream = new FileInputStream(file);
         MockMultipartFile multipartFile = new MockMultipartFile("imagen", file.getName(), "image/jpeg", inputStream);
         RegistroClienteDTO registroClienteDTO = new RegistroClienteDTO(
-                "Cristian Vargas",
+                "Cristian David Vargas",
 
                 multipartFile,
 
-                "cris123",
+                "crisvargas1234",
 
-                "vargasloaizacristian@gmail.com",
+                "davidclaff4@gmail.com",
 
                "cris123",
 
@@ -95,6 +95,19 @@ public class ClienteServicioTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        Assertions.assertTrue(respuesta);
+    }
+
+
+    @Test
+    public void recuperarContraseniaTest(){
+        boolean respuesta;
+        try {
+            respuesta = usuarioServicio.enviarLinkRecuperacion("davidclaff4@gmail.com");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         Assertions.assertTrue(respuesta);
     }
 

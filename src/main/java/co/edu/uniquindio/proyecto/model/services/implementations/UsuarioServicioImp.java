@@ -13,14 +13,15 @@ import co.edu.uniquindio.proyecto.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.*;
 
 @Service
 @Transactional
@@ -57,33 +58,50 @@ public class UsuarioServicioImp implements UsuarioServicio {
 
     @Override
     public boolean cambiarContrasenia(CambioPasswordDTO cambioPasswordDTO) throws Exception {
-        return false;
+        Optional<Usuario> usuarioOptional = usuarioRepo.findById(cambioPasswordDTO.idUsuario());
+        if (usuarioOptional.isEmpty()){
+            throw new Exception("Usuario no encontrado");
+        }
+        Usuario usuario = usuarioOptional.get();
+
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String passwordEncriptada = passwordEncoder.encode(cambioPasswordDTO.passwordNuevo() );
+
+        usuario.setPassword(passwordEncriptada);
+
+        try {
+            usuarioRepo.save(usuario);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return true;
     }
 
     @Override
     public boolean enviarLinkRecuperacion(String correo) throws Exception {
-        Optional<Usuario> usuario = usuarioRepo.findByEmail(correo);
-
-        if (usuario.isEmpty()){
-            throw new Exception("El email no esta registrado");
+        Optional<Usuario> usuarioOptional = usuarioRepo.findByEmail(correo);
+        if (usuarioOptional.isEmpty()){
+            throw new Exception("El usuario no existe");
         }
 
-        //Asunto cuerpo destino
+        Usuario usuario = usuarioOptional.get();
+        emailServicioImp.enviarCorreo(new EmailDTO("Recuperar contraseña",
+                "<h1>Hola!! Haz click en el siguiente botón para reestablecer la contraseña de tu cuenta en Unilocal</h1>" +
+                        "<a href=\"http://localhost:4200/recuperar-contrasenia/"+usuario.getCodigo()+"\"><button>Recuperar contraseña</button></a>", usuario.getEmail()));
 
-        emailServicioImp.enviarCorreo(new EmailDTO("Cambio de contraseña Unilocal", "Para cambiar la contraseña accede al link: link", correo));
         return true;
     }
 
 
     @Override
     public TokenDTO iniciarSesion(LoginDTO loginDTO) throws Exception {
-        Optional<Usuario> clienteOptional = usuarioRepo.findByEmail(loginDTO.correo());
+        Optional<Usuario> clienteOptional = usuarioRepo.findByEmail(loginDTO.email());
         if (clienteOptional.isEmpty()) {
             throw new Exception("El correo no se encuentra registrado");
         }
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         Usuario cliente = clienteOptional.get();
-        if( !passwordEncoder.matches(loginDTO.contrasenia(), cliente.getPassword()) ) {
+        if( !passwordEncoder.matches(loginDTO.password(), cliente.getPassword()) ) {
             throw new Exception("La contraseña es incorrecta");
         }
         Map<String, Object> map = new HashMap<>();
@@ -109,6 +127,10 @@ public class UsuarioServicioImp implements UsuarioServicio {
         // En este espacio se llama al metodo de guardar imagen, y se deben guardar la url y el id
        // Map imagenInfo = imagenesServicioImp.subirImagen(registroClienteDTO.fotoPerfil());
 
+        //File file = new File(registroClienteDTO.fotoPerfil());
+        //InputStream inputStream = new FileInputStream(file);
+        //MockMultipartFile multipartFile = new MockMultipartFile("imagen", file.getName(), "image/jpeg", inputStream);
+
         Map imagenInfo = imagenesServicioImp.subirImagen(registroClienteDTO.fotoPerfil());
         Imagen imagen = new Imagen((String) imagenInfo.get("secure_url"), (String) imagenInfo.get("public_id"));
 
@@ -128,7 +150,7 @@ public class UsuarioServicioImp implements UsuarioServicio {
         }catch (Exception e){
             throw new Exception("Hay un fallo en el servidor");
         }
-        emailServicioImp.enviarCorreo(new EmailDTO("Bienvenico a Unilocal", "Tu cuenta ha sido creada exitosamente", usuario.getEmail()));
+        emailServicioImp.enviarCorreo(new EmailDTO("Bienvenid@ a Unilocal", "Tu cuenta ha sido creada exitosamente", usuario.getEmail()));
         return true;
 
 
@@ -158,7 +180,13 @@ public class UsuarioServicioImp implements UsuarioServicio {
 
         if (usuario.getRegistro() == EstadoRegistro.INACTIVO) {
             throw new Exception("El usuario está inactivo");
+
         }
+
+        //File file = new File(actualizarUsuarioDTO.fotoPerfil());
+        //InputStream inputStream = new FileInputStream(file);
+        //MockMultipartFile multipartFile = new MockMultipartFile("imagen", file.getName(), "image/jpeg", inputStream);
+
         imagenesServicioImp.eliminarImagen(usuario.getFotoDePerfil().getId());
         Map imagenInfo = imagenesServicioImp.subirImagen(actualizarUsuarioDTO.fotoPerfil());
         Imagen imagen = new Imagen((String) imagenInfo.get("secure_url"), (String) imagenInfo.get("public_id"));
@@ -173,7 +201,7 @@ public class UsuarioServicioImp implements UsuarioServicio {
         }catch (Exception e){
             throw new Exception("Error del servidor");
         }
-        emailServicioImp.enviarCorreo(new EmailDTO("Cuenata actualizada", "Tu cuenta ha sido actualizada exitosamente", usuario.getEmail()));
+        emailServicioImp.enviarCorreo(new EmailDTO("Cuenta actualizada", "Tu cuenta ha sido actualizada exitosamente", usuario.getEmail()));
 
         return true;
     }
@@ -201,10 +229,11 @@ public class UsuarioServicioImp implements UsuarioServicio {
 
     @Override
     public List<ItemUsuarioDTO> obtenerUsuarios(int pagina) {
-        Page<Usuario> usuarios = usuarioRepo.findAll(PageRequest.of(pagina, 10));
+        ArrayList<Usuario> usuarios = (ArrayList<Usuario>) usuarioRepo.findAll();
 
         return usuarios.stream().filter(c -> c.getRegistro() == EstadoRegistro.ACTIVO).map(c ->
                 new ItemUsuarioDTO(
+                        c.getCodigo(),
                         c.getNombre(),
                         c.getUsername(),
                         c.getEmail(),
@@ -234,6 +263,49 @@ public class UsuarioServicioImp implements UsuarioServicio {
         return true;
     }
 
+    @Override
+    public List<DetalleNegocioDTO> obtenerLugaresArchivados(String codigo) throws Exception {
+        ArrayList<Lugar> lugarPage = lugarRepo.findByIdUsuario(codigo, EstadoLugar.ARCHIVADO);
+        return lugarPage.stream().map(c ->
+                new DetalleNegocioDTO(
+                        c.getCodigo(),
+                        c.getNombre(),
+                        c.getDescripcion(),
+                        c.getImagenes(),
+                        c.getTelefonos(),
+                        c.getCategoria(),
+                        c.getUbicacion(),
+                        c.getHorarios(),
+                        c.getIdUsuario()
 
-    // falta el de republicar un lugar de nuevo
+                )
+        ).toList();
+
+    }
+
+    @Override
+    public boolean republicarLugar(String codigo) throws Exception {
+        Optional<Lugar> lugarOptional = lugarRepo.findById(codigo);
+
+        if (lugarOptional.isEmpty()){
+            throw new Exception("El lugar no existe");
+        }
+
+        Lugar lugar = lugarOptional.get();
+        if (!(lugar.getEstadoLugar() == EstadoLugar.ARCHIVADO)) {
+            throw new Exception("El lugar no se encuentra archivado");
+        }
+
+        lugar.setEstadoLugar(EstadoLugar.ACTIVO);
+
+        try {
+            lugarRepo.save(lugar);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return true;
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyecto.model.services.implementations;
 
 import co.edu.uniquindio.proyecto.dto.CrearDenunciaDTO;
+import co.edu.uniquindio.proyecto.dto.DetalleDenuncia;
 import co.edu.uniquindio.proyecto.dto.DetalleUsuarioDTO;
 import co.edu.uniquindio.proyecto.dto.EmailDTO;
 import co.edu.uniquindio.proyecto.model.documents.Denuncia;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -92,5 +95,22 @@ public class DenunciaServicioImp implements DenunciaServicio {
         DetalleUsuarioDTO detalleUsuarioDTO = usuarioServicioImp.obtenerUsuario(denuncia.getIdUsuario());
         emailServicioImp.enviarCorreo(new EmailDTO("Denuncia Rechazada", "Su denuncia ha sido rechazada", detalleUsuarioDTO.email()));
         return true;
+    }
+
+    @Override
+    public List<DetalleDenuncia> listarDenuncias() {
+        ArrayList<Denuncia> denuncias = denunciaRepo.findAllNotRejected(EstadoDenuncia.ESPERA);
+        return denuncias.stream().map(d -> new DetalleDenuncia(d.getCodigo(), d.getIdUsuario(), d.getIdlugar(), d.getMotivo())).toList();
+
+    }
+
+    @Override
+    public DetalleDenuncia obtenerDenuncia(String codigo) throws Exception {
+        Optional<Denuncia> denunciaOptional = denunciaRepo.findById(codigo);
+        if (denunciaOptional.isEmpty()){
+            throw new Exception("No se pudo encontrar la denuncia");
+        }
+        Denuncia denuncia = denunciaOptional.get();
+        return new DetalleDenuncia(denuncia.getCodigo(), denuncia.getIdUsuario(), denuncia.getIdlugar(), denuncia.getMotivo());
     }
 }

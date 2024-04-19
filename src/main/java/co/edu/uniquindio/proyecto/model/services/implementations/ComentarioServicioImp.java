@@ -3,6 +3,7 @@ package co.edu.uniquindio.proyecto.model.services.implementations;
 import co.edu.uniquindio.proyecto.dto.CrearComentarioDTO;
 import co.edu.uniquindio.proyecto.dto.DetalleComentario;
 import co.edu.uniquindio.proyecto.dto.DetalleUsuarioDTO;
+import co.edu.uniquindio.proyecto.dto.EmailDTO;
 import co.edu.uniquindio.proyecto.model.documents.Comentario;
 import co.edu.uniquindio.proyecto.model.documents.Usuario;
 import co.edu.uniquindio.proyecto.model.services.interfaces.ComentarioServicio;
@@ -22,7 +23,9 @@ import java.util.Optional;
 public class ComentarioServicioImp implements ComentarioServicio {
 
     private final ComentarioRepo comentarioRepo;
+    private final EmailServicioImp emailServicioImp;
     private final UsuarioServicioImp usuarioServicioImp;
+    private final LugarServicioImp lugarServicioImp;
     @Override
     public boolean crearComentario(CrearComentarioDTO crearComentarioDTO) throws Exception {
 
@@ -33,13 +36,27 @@ public class ComentarioServicioImp implements ComentarioServicio {
         comentario.setTitulo(crearComentarioDTO.titulo());
         comentario.setCalificacion(crearComentarioDTO.calificacion());
         comentario.setRespuesta("");
+        
+
+        String email = obtenerEmailUsuarioNegocio(crearComentarioDTO.idNegocio());
+
 
         try{
             comentarioRepo.save(comentario);
+            emailServicioImp.enviarCorreo(new EmailDTO("Nuevo comentario en tu publicación",
+                    "<h1>Hay un nuevo comentario en tu publicación </h1> </br> <b> El comentario es el siguiente: </b>"+comentario.getContenido(), email));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return true;
+    }
+
+    private String obtenerEmailUsuarioNegocio(String codigoLugar) {
+        try {
+            return lugarServicioImp.obtenerEmailUsuarioNegocio(codigoLugar);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

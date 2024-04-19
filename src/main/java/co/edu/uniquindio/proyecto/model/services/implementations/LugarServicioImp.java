@@ -2,16 +2,23 @@ package co.edu.uniquindio.proyecto.model.services.implementations;
 
 import co.edu.uniquindio.proyecto.dto.*;
 import co.edu.uniquindio.proyecto.model.documents.Lugar;
+import co.edu.uniquindio.proyecto.model.documents.Usuario;
 import co.edu.uniquindio.proyecto.model.entities.Imagen;
+import co.edu.uniquindio.proyecto.model.entities.Revision;
+import co.edu.uniquindio.proyecto.model.enums.Categoria;
 import co.edu.uniquindio.proyecto.model.enums.EstadoLugar;
 import co.edu.uniquindio.proyecto.model.services.interfaces.LugarServicio;
 import co.edu.uniquindio.proyecto.repositorios.LugarRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +53,27 @@ public class LugarServicioImp implements LugarServicio {
     private ArrayList<Imagen> almacenarImagenes(ArrayList<MultipartFile> imagenes) throws Exception {
         ArrayList<Imagen> listaImagenes = new ArrayList<>();
 
-        for(MultipartFile multipartFile: imagenes){
+        /**
+        for(String foto: imagenes){
+            File file = new File(foto);
+            InputStream inputStream = new FileInputStream(file);
+            MockMultipartFile multipartFile = new MockMultipartFile("imagen", file.getName(), "image/jpeg", inputStream);
+
             Map imagenMap = imagenesServicioImp.subirImagen(multipartFile);
             Imagen imagen = new Imagen((String) imagenMap.get("secure_url"), (String) imagenMap.get("public_id"));
             listaImagenes.add(imagen);
         }
+         **/
+
+        //Se usará para el frontend
+
+        for(MultipartFile multipartFile: imagenes){
+
+            Map imagenMap = imagenesServicioImp.subirImagen(multipartFile);
+            Imagen imagen = new Imagen((String) imagenMap.get("secure_url"), (String) imagenMap.get("public_id"));
+            listaImagenes.add(imagen);
+        }
+
         return  listaImagenes;
     }
 
@@ -69,6 +92,7 @@ public class LugarServicioImp implements LugarServicio {
         lugar.setUbicacion(crearNegocioDTO.ubicacion());
         lugar.setIdUsuario(crearNegocioDTO.idUsuario());
         lugar.setImagenes(almacenarImagenes(crearNegocioDTO.imagenes()));
+        lugar.setListaRevisiones(new ArrayList<Revision>());
         return lugar;
     }
 
@@ -165,6 +189,25 @@ public class LugarServicioImp implements LugarServicio {
     }
 
     @Override
+    public List<DetalleNegocioDTO> filtrarPorCategoria(Categoria categoria) throws Exception {
+        ArrayList<Lugar> lugarPage = lugarRepo.findByCategoria(categoria);
+        return lugarPage.stream().map(c ->
+                new DetalleNegocioDTO(
+                        c.getCodigo(),
+                        c.getNombre(),
+                        c.getDescripcion(),
+                        c.getImagenes(),
+                        c.getTelefonos(),
+                        c.getCategoria(),
+                        c.getUbicacion(),
+                        c.getHorarios(),
+                        c.getIdUsuario()
+
+                )
+        ).toList();
+    }
+
+    @Override
     public List<DetalleNegocioDTO> listarLugaresPropietario(String idPropietario) throws Exception {
         ArrayList<Lugar> lugarPage = lugarRepo.findByIdUsuario(idPropietario, EstadoLugar.ACTIVO);
         return lugarPage.stream().map(c ->
@@ -208,13 +251,22 @@ public class LugarServicioImp implements LugarServicio {
     }
 
     public ObtenerNegocioDTO obtenerLugarDetalle(String idLugar) throws Exception {
-        Optional<ObtenerNegocioDTO> lugarOptional = lugarRepo.findByIdAndEstadoLugar(idLugar, EstadoLugar.ACTIVO);
+        Optional<Lugar> lugarOptional = lugarRepo.findLugar(idLugar, EstadoLugar.ACTIVO);
         if (lugarOptional.isEmpty()){
             throw new Exception("Lugar no encontrado");
         }
-
-        return lugarOptional.get();
-
+        Lugar lugar = lugarOptional.get();
+        return new ObtenerNegocioDTO(
+                lugar.getCodigo(),
+                lugar.getNombre(),
+                lugar.getDescripcion(),
+                lugar.getImagenes(),
+                lugar.getTelefonos(),
+                lugar.getCategoria(),
+                lugar.getUbicacion(),
+                lugar.getHorarios(),
+                lugar.getIdUsuario()
+        );
     }
 
     @Override
@@ -238,5 +290,35 @@ public class LugarServicioImp implements LugarServicio {
     @Override
     public List<ObtenerNegocioDTO> listarLugaresCliente(String idCliente) throws Exception {
         return lugarRepo.findLugaresUsuario(idCliente, EstadoLugar.ACTIVO);
+    }
+
+    @Override
+    public String obtenerEmailUsuarioNegocio(String codigoLugar) throws Exception {
+        Optional<Lugar> lugarOptional = lugarRepo.findById(codigoLugar);
+        if (lugarOptional.isEmpty()){
+            throw new Exception("El lugar no existe");
+        }
+        Lugar lugar = lugarOptional.get();
+        DetalleUsuarioDTO usuarioOptional =  usuarioServicioImp.obtenerUsuario(lugar.getIdUsuario());
+        return usuarioOptional.email();
+    }
+
+    public ObtenerNegocioDTO obtenerLugarDetalleModerador(String codigo) throws Exception {
+        Optional<Lugar> lugarOptional = lugarRepo.findById(codigo);
+        if (lugarOptional.isEmpty()){
+            throw new Exception("Lugar no encontrado");
+        }
+        Lugar lugar = lugarOptional.get();
+        return new ObtenerNegocioDTO(
+                lugar.getCodigo(),
+                lugar.getNombre(),
+                lugar.getDescripcion(),
+                lugar.getImagenes(),
+                lugar.getTelefonos(),
+                lugar.getCategoria(),
+                lugar.getUbicacion(),
+                lugar.getHorarios(),
+                lugar.getIdUsuario()
+        );
     }
 }

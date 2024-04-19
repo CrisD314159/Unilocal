@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyecto.repositorios;
 
 import co.edu.uniquindio.proyecto.dto.ObtenerNegocioDTO;
 import co.edu.uniquindio.proyecto.model.documents.Lugar;
+import co.edu.uniquindio.proyecto.model.enums.Categoria;
 import co.edu.uniquindio.proyecto.model.enums.EstadoLugar;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -26,6 +27,9 @@ public interface LugarRepo extends MongoRepository<Lugar, String> {
     @Query("{'idUsuario': ?0, 'estadoLugar': ?1}")
     ArrayList<Lugar> findByIdUsuario(String idPropietario, EstadoLugar activo);
 
+    @Query("{'_id': ?0, 'estadoLugar': ?1}")
+    Optional<Lugar> findLugar(String id, EstadoLugar activo);
+
     @Aggregation({"{$match: {idUsuario: ?0} }"})
     List<Lugar> encontrarPropietarios (String codigoCliente);
 
@@ -43,4 +47,6 @@ public interface LugarRepo extends MongoRepository<Lugar, String> {
                     "{$project: { nombre: '$nombre', descripcion: '$descripcion', imagenes: '$imagenes', telefonos: '$telefonos', categoria: '$categoria', ubicacion: '$ubicacion', horarios: '$horarios', nombreUsuario: '$user.nombre' } }"
             })
     List<ObtenerNegocioDTO> findLugaresUsuario(String idCliente, EstadoLugar estadoLugar);
+
+    ArrayList<Lugar> findByCategoria(Categoria categoria);
 }

@@ -13,7 +13,8 @@ import lombok.*;
 @Setter
 public class Revision {
     private TipoEstado estado;
-    private Moderador moderador;
-    private Lugar lugar;
+    private String moderador;
+    private String lugar;
+    private String motivo;
 
 }

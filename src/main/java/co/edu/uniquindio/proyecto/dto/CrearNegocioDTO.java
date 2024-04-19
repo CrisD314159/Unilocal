@@ -15,8 +15,8 @@ public record CrearNegocioDTO (
        @NotBlank String descripcion,
        @NotBlank String nombre,
        @NotEmpty ArrayList<String> telefonos,
-       @NotEmpty ArrayList<MultipartFile> imagenes,
-       @NotBlank Categoria categoria,
+       ArrayList<MultipartFile> imagenes,
+       Categoria categoria,
        Coordenada ubicacion,///
        String idUsuario,/////
        @NotEmpty ArrayList<Horario> horarios

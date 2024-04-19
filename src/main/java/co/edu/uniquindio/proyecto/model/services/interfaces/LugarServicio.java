@@ -2,6 +2,7 @@ package co.edu.uniquindio.proyecto.model.services.interfaces;
 
 import co.edu.uniquindio.proyecto.dto.*;
 import co.edu.uniquindio.proyecto.model.documents.Lugar;
+import co.edu.uniquindio.proyecto.model.enums.Categoria;
 import co.edu.uniquindio.proyecto.model.enums.EstadoLugar;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public interface LugarServicio {
     List<DetalleNegocioDTO> buscarLugar(String busqueda) throws Exception;
 
     List<DetalleNegocioDTO> filtrarPorEstado(EstadoLugar estadoLugar) throws Exception;
+    List<DetalleNegocioDTO> filtrarPorCategoria(Categoria categoria) throws Exception;
 
     List<DetalleNegocioDTO>  listarLugaresPropietario(String idPropietario) throws Exception;
 
@@ -32,6 +34,5 @@ public interface LugarServicio {
     List<ObtenerNegocioDTO> listarLugaresCliente(String idCliente) throws Exception;
 
 
-
-
+    String obtenerEmailUsuarioNegocio(String codigoLugar) throws Exception;
 }
