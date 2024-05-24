@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 public record RegistroClienteDTO (
         @NotBlank @Length(max = 50) String nombre,
 
-        MultipartFile fotoPerfil,
+        String fotoPerfil,
 
         @NotBlank String nickname,
 

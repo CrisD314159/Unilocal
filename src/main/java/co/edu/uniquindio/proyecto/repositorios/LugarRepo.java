@@ -21,7 +21,7 @@ public interface LugarRepo extends MongoRepository<Lugar, String> {
 
     ArrayList<Lugar> findByEstadoLugar(EstadoLugar estadoLugar);
 
-    @Query("{'nombre': ?0, 'estadoLugar': ?1}")
+    @Query("{'nombre': { $regex: ?0, $options: 'i' }, 'estadoLugar': ?1}")
     ArrayList<Lugar> findByNombreIsLike(String nombre, EstadoLugar activo);
 
     @Query("{'idUsuario': ?0, 'estadoLugar': ?1}")
@@ -49,4 +49,5 @@ public interface LugarRepo extends MongoRepository<Lugar, String> {
     List<ObtenerNegocioDTO> findLugaresUsuario(String idCliente, EstadoLugar estadoLugar);
 
     ArrayList<Lugar> findByCategoria(Categoria categoria);
+
 }

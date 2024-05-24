@@ -32,5 +32,6 @@ public class Usuario extends Cuenta implements Serializable {
     private ArrayList<Denuncia> denuncias;
     private EstadoRegistro registro;
     private ArrayList<String> recomendaciones;
+    private ArrayList<String> favoritos;
 
 }

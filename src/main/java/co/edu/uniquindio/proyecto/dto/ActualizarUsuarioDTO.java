@@ -8,11 +8,9 @@ public record ActualizarUsuarioDTO (
         @NotBlank String id,
 
        @NotBlank String nombre,
-        MultipartFile fotoPerfil,
+        String fotoPerfil,
 
        @NotBlank String nickname,
-
-       @NotBlank @Length String password,
 
        @NotBlank String ciudadResidencia
 ) {

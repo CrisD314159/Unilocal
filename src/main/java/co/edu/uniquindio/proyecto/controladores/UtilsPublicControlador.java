@@ -1,6 +1,7 @@
 package co.edu.uniquindio.proyecto.controladores;
 
 import co.edu.uniquindio.proyecto.dto.CambioPasswordDTO;
+import co.edu.uniquindio.proyecto.dto.DetalleUsuarioDTO;
 import co.edu.uniquindio.proyecto.dto.MensajeDTO;
 import co.edu.uniquindio.proyecto.model.services.implementations.UsuarioServicioImp;
 import jakarta.validation.Valid;
@@ -25,5 +26,10 @@ public class UtilsPublicControlador {
     public ResponseEntity<MensajeDTO<String>> enviarLinkPassword(@PathVariable String correo) throws Exception {
         usuarioServicioImp.enviarLinkRecuperacion(correo);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "Link enviado exitosamente"));
+    }
+
+    @GetMapping("/recuperar/get-cliente/{codigo}")
+    public ResponseEntity<MensajeDTO<DetalleUsuarioDTO>> obtenerCliente(@PathVariable String codigo) throws Exception{
+        return ResponseEntity.ok().body(new MensajeDTO<>(false,  usuarioServicioImp.obtenerUsuario(codigo)));
     }
 }

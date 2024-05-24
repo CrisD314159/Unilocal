@@ -105,6 +105,13 @@ public class DenunciaServicioImp implements DenunciaServicio {
     }
 
     @Override
+    public List<DetalleDenuncia> listarDenunciasRechazadas() throws Exception {
+        ArrayList<Denuncia> denuncias = denunciaRepo.findAllRejected(EstadoDenuncia.RECHAZADA);
+        return denuncias.stream().map(d -> new DetalleDenuncia(d.getCodigo(), d.getIdUsuario(), d.getIdlugar(), d.getMotivo())).toList();
+
+    }
+
+    @Override
     public DetalleDenuncia obtenerDenuncia(String codigo) throws Exception {
         Optional<Denuncia> denunciaOptional = denunciaRepo.findById(codigo);
         if (denunciaOptional.isEmpty()){
@@ -113,4 +120,6 @@ public class DenunciaServicioImp implements DenunciaServicio {
         Denuncia denuncia = denunciaOptional.get();
         return new DetalleDenuncia(denuncia.getCodigo(), denuncia.getIdUsuario(), denuncia.getIdlugar(), denuncia.getMotivo());
     }
+
+
 }

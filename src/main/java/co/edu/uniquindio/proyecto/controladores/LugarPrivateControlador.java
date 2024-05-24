@@ -28,6 +28,12 @@ public class LugarPrivateControlador {
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "Negocio actualizado exitosamente"));
     }
 
+    @PutMapping("/archivar-lugar/{codigo}")
+    public ResponseEntity<MensajeDTO<String>> actualizarLugar (@PathVariable String codigo) throws Exception{
+        lugarServicioImp.archivarLugar(codigo);
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, "Negocio archivado exitosamente"));
+    }
+
     @DeleteMapping("/eliminar/{codigo}")
     public ResponseEntity<MensajeDTO<String>> eliminarLugar(@PathVariable String codigo)throws Exception{
         lugarServicioImp.eliminarNegocio(codigo);

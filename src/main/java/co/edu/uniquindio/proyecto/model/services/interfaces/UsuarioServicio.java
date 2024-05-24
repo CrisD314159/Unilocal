@@ -16,8 +16,16 @@ public interface UsuarioServicio extends CuentaServicio{
 
     boolean archivarLugar(String idLugar)  throws  Exception;
 
-   List<DetalleNegocioDTO> obtenerLugaresArchivados(String codigo) throws Exception;
+   List<BasicNegocioDTO> obtenerLugaresArchivados(String codigo) throws Exception;
 
 
     boolean republicarLugar(String codigo) throws Exception;
+
+    void agregarFavoritos(String codigo, String idNegocio) throws Exception;
+
+    void quitarFavorito(String codigo, String idNegocio) throws Exception;
+
+    List<ObtenerNegocioDTO> obtenerFavorito(String codigo) throws Exception;
+
+    boolean buscarFavorito(String codigo, String idNegocio) throws Exception;
 }

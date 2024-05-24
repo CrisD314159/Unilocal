@@ -17,4 +17,7 @@ public interface DenunciaRepo extends MongoRepository<Denuncia, String> {
 
     @Query("{'estadoDenuncia': ?0}")
     ArrayList<Denuncia> findAllNotRejected(EstadoDenuncia estadoDenuncia);
+
+    @Query("{'estadoDenuncia': ?0}")
+    ArrayList<Denuncia> findAllRejected(EstadoDenuncia estadoDenuncia);
 }

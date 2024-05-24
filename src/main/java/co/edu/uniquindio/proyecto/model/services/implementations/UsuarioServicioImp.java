@@ -11,16 +11,10 @@ import co.edu.uniquindio.proyecto.repositorios.LugarRepo;
 import co.edu.uniquindio.proyecto.repositorios.UsuarioRepo;
 import co.edu.uniquindio.proyecto.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -131,20 +125,21 @@ public class UsuarioServicioImp implements UsuarioServicio {
         //InputStream inputStream = new FileInputStream(file);
         //MockMultipartFile multipartFile = new MockMultipartFile("imagen", file.getName(), "image/jpeg", inputStream);
 
-        Map imagenInfo = imagenesServicioImp.subirImagen(registroClienteDTO.fotoPerfil());
-        Imagen imagen = new Imagen((String) imagenInfo.get("secure_url"), (String) imagenInfo.get("public_id"));
+        //Map imagenInfo = imagenesServicioImp.subirImagen(registroClienteDTO.fotoPerfil());
+        //Imagen imagen = new Imagen((String) imagenInfo.get("secure_url"), (String) imagenInfo.get("public_id"));
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String passwordEncriptada = passwordEncoder.encode(registroClienteDTO.password() );
 
         Usuario usuario = new Usuario();
         usuario.setNombre(registroClienteDTO.nombre());
-        usuario.setFotoDePerfil(imagen);
+        usuario.setFotoDePerfil(new Imagen(registroClienteDTO.fotoPerfil(), null));
         usuario.setDireccion(registroClienteDTO.ciudadResidencia());
         usuario.setRegistro(EstadoRegistro.ACTIVO);
         usuario.setEmail(registroClienteDTO.email());
         usuario.setUsername(registroClienteDTO.nickname());
         usuario.setPassword(passwordEncriptada);
+        usuario.setFavoritos(new ArrayList<>());
         try{
             usuarioRepo.save(usuario);
         }catch (Exception e){
@@ -187,14 +182,17 @@ public class UsuarioServicioImp implements UsuarioServicio {
         //InputStream inputStream = new FileInputStream(file);
         //MockMultipartFile multipartFile = new MockMultipartFile("imagen", file.getName(), "image/jpeg", inputStream);
 
-        imagenesServicioImp.eliminarImagen(usuario.getFotoDePerfil().getId());
-        Map imagenInfo = imagenesServicioImp.subirImagen(actualizarUsuarioDTO.fotoPerfil());
-        Imagen imagen = new Imagen((String) imagenInfo.get("secure_url"), (String) imagenInfo.get("public_id"));
+       // imagenesServicioImp.eliminarImagen(usuario.getFotoDePerfil().getId());
+        //Map imagenInfo = imagenesServicioImp.subirImagen(actualizarUsuarioDTO.fotoPerfil());
+        //Imagen imagen = new Imagen((String) imagenInfo.get("secure_url"), (String) imagenInfo.get("public_id"));
 
         usuario.setNombre(actualizarUsuarioDTO.nombre());
         usuario.setUsername(actualizarUsuarioDTO.nickname());
         usuario.setDireccion(actualizarUsuarioDTO.ciudadResidencia());
-        usuario.setFotoDePerfil(imagen);
+        if (actualizarUsuarioDTO.fotoPerfil() != null){
+            usuario.setFotoDePerfil(new Imagen(actualizarUsuarioDTO.fotoPerfil(), null));
+        }
+
 
         try{
             usuarioRepo.save(usuario);
@@ -264,14 +262,14 @@ public class UsuarioServicioImp implements UsuarioServicio {
     }
 
     @Override
-    public List<DetalleNegocioDTO> obtenerLugaresArchivados(String codigo) throws Exception {
+    public List<BasicNegocioDTO> obtenerLugaresArchivados(String codigo) throws Exception {
         ArrayList<Lugar> lugarPage = lugarRepo.findByIdUsuario(codigo, EstadoLugar.ARCHIVADO);
         return lugarPage.stream().map(c ->
-                new DetalleNegocioDTO(
+                new BasicNegocioDTO(
                         c.getCodigo(),
                         c.getNombre(),
                         c.getDescripcion(),
-                        c.getImagenes(),
+                        c.getImagenes().stream().map(Imagen::getLink).toList(),
                         c.getTelefonos(),
                         c.getCategoria(),
                         c.getUbicacion(),
@@ -305,6 +303,91 @@ public class UsuarioServicioImp implements UsuarioServicio {
             throw new RuntimeException(e);
         }
         return true;
+    }
+
+    @Override
+    public void agregarFavoritos(String codigo, String idNegocio) throws Exception{
+        Optional<Usuario> usuarioOptional = usuarioRepo.findById(codigo);
+        Optional<Lugar> lugarOptional = lugarRepo.findById(idNegocio);
+        if (usuarioOptional.isEmpty() || lugarOptional.isEmpty()){
+            throw new Exception("El usuario o el lugar no existen");
+        }
+        Usuario usuario = usuarioOptional.get();
+        usuario.getFavoritos().add(lugarOptional.get().getCodigo());
+        try {
+            usuarioRepo.save(usuario);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+
+        }
+
+    }
+
+    @Override
+    public void quitarFavorito(String codigo, String idNegocio) throws Exception{
+        Optional<Usuario> usuarioOptional = usuarioRepo.findById(codigo);
+        Optional<Lugar> lugarOptional = lugarRepo.findById(idNegocio);
+        if (usuarioOptional.isEmpty() || lugarOptional.isEmpty()){
+            throw new Exception("El usuario o el lugar no existen");
+        }
+        Usuario usuario = usuarioOptional.get();
+        usuario.getFavoritos().remove(lugarOptional.get().getCodigo());
+        try {
+            usuarioRepo.save(usuario);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+
+        }
+
+    }
+
+    @Override
+    public List<ObtenerNegocioDTO> obtenerFavorito(String codigo) throws Exception{
+        Optional<Usuario> usuarioOptional = usuarioRepo.findById(codigo);
+        if (usuarioOptional.isEmpty()){
+            throw new Exception("El usuario no existe");
+        }
+        Usuario usuario = usuarioOptional.get();
+        return extractPlaces(usuario.getFavoritos()) ;
+
+    }
+
+    @Override
+    public boolean buscarFavorito(String codigo, String idNegocio) throws Exception {
+        Optional<Usuario> usuarioOptional = usuarioRepo.findById(codigo);
+        if (usuarioOptional.isEmpty()){
+            throw new Exception("El usuario no existe");
+        }
+        Usuario usuario = usuarioOptional.get();
+        return usuario.getFavoritos().contains(idNegocio);
+    }
+
+    private List<ObtenerNegocioDTO> extractPlaces(ArrayList<String> lugares) throws Exception{
+        List<ObtenerNegocioDTO> lugaresDTO = new ArrayList<>();
+        for (String negocio : lugares) {
+            Optional<Lugar> lugarOptional = lugarRepo.findById(negocio);
+            if (lugarOptional.isEmpty()){
+                throw new Exception("El lugar no existe");
+            }
+            Lugar lugar = lugarOptional.get();
+            lugaresDTO.add(
+                    new ObtenerNegocioDTO(
+                            lugar.getCodigo(),
+                            lugar.getNombre(),
+                            lugar.getDescripcion(),
+                            lugar.getImagenes().stream().map(Imagen::getLink).toList(),
+                            lugar.getTelefonos(),
+                            lugar.getCategoria(),
+                            lugar.getUbicacion(),
+                            lugar.getHorarios(),
+                            lugar.getIdUsuario()
+                    )
+            );
+
+
+        }
+        return lugaresDTO;
+
     }
 
 

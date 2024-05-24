@@ -35,4 +35,6 @@ public interface LugarServicio {
 
 
     String obtenerEmailUsuarioNegocio(String codigoLugar) throws Exception;
+
+    List<ObtenerNegocioDTO> obtenerLugares() throws Exception;
 }

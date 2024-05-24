@@ -2,13 +2,13 @@ package co.edu.uniquindio.proyecto.dto;
 
 import co.edu.uniquindio.proyecto.model.entities.Coordenada;
 import co.edu.uniquindio.proyecto.model.entities.Horario;
-import co.edu.uniquindio.proyecto.model.entities.Imagen;
 import co.edu.uniquindio.proyecto.model.enums.Categoria;
+import co.edu.uniquindio.proyecto.model.enums.EstadoLugar;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record ObtenerNegocioDTO(
+public record BasicNegocioDTO(
         String codigoNegocio,
         String nombre,
         String descripcion,
@@ -17,7 +17,8 @@ public record ObtenerNegocioDTO(
         Categoria tipoNegocio,
         Coordenada ubicacion,
         ArrayList<Horario> horarios,
-        String nombreUsuario
-){
+        String idUsuario
+
+) {
 
 }

@@ -102,7 +102,7 @@ public class ModeradorServicioImp implements ModeradorServicio {
         Optional<Usuario> usuarioOptional = usuarioRepo.findById(lugar.getIdUsuario());
         Usuario usuario = usuarioOptional.get();
 
-        if (lugar.getEstadoLugar() != EstadoLugar.ESPERA){
+        if (lugar.getEstadoLugar() != EstadoLugar.ESPERA && !(lugar.getEstadoLugar() == EstadoLugar.RECHAZADO)){
             throw new Exception("Este lugar se encuentra activo o rechazado");
         }
         lugar.setEstadoLugar(EstadoLugar.ACTIVO);
@@ -130,10 +130,10 @@ public class ModeradorServicioImp implements ModeradorServicio {
         Lugar lugar = lugarOptional.get();
         Optional<Usuario> usuarioOptional = usuarioRepo.findById(lugar.getIdUsuario());
         Usuario usuario = usuarioOptional.get();
-        if (lugar.getEstadoLugar() != EstadoLugar.ESPERA){
+        if (lugar.getEstadoLugar() != EstadoLugar.ESPERA && lugar.getEstadoLugar() != EstadoLugar.RECHAZADO){
             throw new Exception("Este lugar se encuentra activo o inactivo");
         }
-        lugar.setEstadoLugar(EstadoLugar.INACTIVO);
+        lugar.setEstadoLugar(EstadoLugar.RECHAZADO);
         Revision revision = new Revision(TipoEstado.DESAPROBADO, "Unilocal Moderators", lugar.getCodigo(), "El lugar no cumple con los terminos y condiciones de Unilocal" );
         lugar.getListaRevisiones().add(revision);
 

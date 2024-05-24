@@ -15,7 +15,7 @@ public record ActualizarNegocioDTO(
         @NotBlank String descripcion,
         @NotBlank String nombre,
         @NotEmpty ArrayList<String> telefonos,
-        @NotEmpty ArrayList<MultipartFile> imagenes,
+         ArrayList<String> imagenes,
         Coordenada ubicacion,///
         @NotEmpty ArrayList<Horario> horarios
 ) {

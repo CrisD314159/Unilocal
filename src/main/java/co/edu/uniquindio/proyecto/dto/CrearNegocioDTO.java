@@ -15,10 +15,10 @@ public record CrearNegocioDTO (
        @NotBlank String descripcion,
        @NotBlank String nombre,
        @NotEmpty ArrayList<String> telefonos,
-       ArrayList<MultipartFile> imagenes,
-       Categoria categoria,
+       ArrayList<String> imagenes,
+       Categoria tipoNegocio,
        Coordenada ubicacion,///
-       String idUsuario,/////
+       String codigoCliente,/////
        @NotEmpty ArrayList<Horario> horarios
 ) {
 

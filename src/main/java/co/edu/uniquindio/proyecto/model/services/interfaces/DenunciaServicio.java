@@ -14,4 +14,6 @@ public interface DenunciaServicio {
     List<DetalleDenuncia> listarDenuncias();
 
     DetalleDenuncia obtenerDenuncia(String codigo) throws Exception;
+
+    List<DetalleDenuncia> listarDenunciasRechazadas() throws Exception;
 }

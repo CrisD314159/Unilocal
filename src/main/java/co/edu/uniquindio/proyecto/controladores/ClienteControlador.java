@@ -38,7 +38,7 @@ public class ClienteControlador {
     }
 
     @GetMapping("/obtener-archivados/{codigo}")
-    public ResponseEntity<MensajeDTO<List<DetalleNegocioDTO>>> obtenerLugaresArchivados(@PathVariable String codigo) throws Exception{
+    public ResponseEntity<MensajeDTO<List<BasicNegocioDTO>>> obtenerLugaresArchivados(@PathVariable String codigo) throws Exception{
         return ResponseEntity.ok().body(new MensajeDTO<>(false, usuarioServicioImp.obtenerLugaresArchivados(codigo)));
 
     }
@@ -47,6 +47,33 @@ public class ClienteControlador {
     public ResponseEntity<MensajeDTO<String>> republicarNegocio(@PathVariable String codigo) throws Exception{
         usuarioServicioImp.republicarLugar(codigo);
         return ResponseEntity.ok().body(new MensajeDTO<>(false, "El negocio fue re plublicado"));
+
+    }
+
+    @PostMapping("/agregar-favoritos")
+    public ResponseEntity<MensajeDTO<String>> agregarFavoritos(@RequestBody FavoritoDTO favoritoDTO) throws Exception{
+        usuarioServicioImp.agregarFavoritos(favoritoDTO.idUsuario(), favoritoDTO.idNegocio());
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, "El negocio fue agregado a favoritos"));
+
+    }
+
+    @PutMapping("/quitar-favorito/{codigo}")
+    public ResponseEntity<MensajeDTO<String>> quitarFavoritos(@PathVariable String codigo, @RequestBody String idNegocio) throws Exception{
+        usuarioServicioImp.quitarFavorito(codigo, idNegocio);
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, "El negocio fue agregado a favoritos"));
+
+    }
+
+    @GetMapping("/obtener-favoritos/{codigo}")
+    public ResponseEntity<MensajeDTO<List<ObtenerNegocioDTO>>> obtenerFavoritos(@PathVariable String codigo) throws Exception{
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, usuarioServicioImp.obtenerFavorito(codigo)));
+
+    }
+
+    @PostMapping("/buscar-favorito/{codigo}")
+    public ResponseEntity<MensajeDTO<Boolean>> buscarFavorito(@PathVariable String codigo, @RequestBody String idNegocio) throws Exception{
+
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, usuarioServicioImp.buscarFavorito(codigo, idNegocio)));
 
     }
 

@@ -20,7 +20,7 @@ public class LugarPublicControlador {
 
 
     @GetMapping("/search/categoria/{categoria}")
-    public ResponseEntity<MensajeDTO<List<DetalleNegocioDTO>>> filtrarPorEstado (@PathVariable Categoria categoria) throws Exception {
+    public ResponseEntity<MensajeDTO<List<DetalleNegocioDTO>>> filtrarPorCategoria (@PathVariable Categoria categoria) throws Exception {
 
         return ResponseEntity.ok().body(new MensajeDTO<>(false,lugarServicioImp.filtrarPorCategoria(categoria)));
 
@@ -46,6 +46,14 @@ public class LugarPublicControlador {
     public ResponseEntity<MensajeDTO<ObtenerNegocioDTO>> obtenerLugar(@PathVariable String codigo) throws Exception{
 
         return ResponseEntity.ok().body(new MensajeDTO<>(false,lugarServicioImp.obtenerLugarDetalle(codigo) ));
+
+    }
+
+
+    @GetMapping("/obtener-lugares")
+    public ResponseEntity<MensajeDTO<List<DetalleNegocioDTO>>> obtenerLugares() throws Exception{
+
+        return ResponseEntity.ok().body(new MensajeDTO<>(false,lugarServicioImp.filtrarPorEstado(EstadoLugar.ACTIVO) ));
 
     }
 

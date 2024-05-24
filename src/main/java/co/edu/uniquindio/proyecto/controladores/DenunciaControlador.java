@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/denuncias")
 @RequiredArgsConstructor
@@ -37,6 +39,18 @@ public class DenunciaControlador {
     public ResponseEntity<MensajeDTO<DetalleDenuncia>> obtenerDenuncia(@PathVariable String codigo) throws Exception {
 
         return ResponseEntity.ok().body(new MensajeDTO<>(false, denunciaServicioImp.obtenerDenuncia(codigo)));
+    }
+
+    @GetMapping("/obtener-denuncias")
+    public ResponseEntity<MensajeDTO<List<DetalleDenuncia>>> obtenerDenuncias() throws Exception {
+
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, denunciaServicioImp.listarDenuncias()));
+    }
+
+    @GetMapping("/obtener-denuncias-rechazadas")
+    public ResponseEntity<MensajeDTO<List<DetalleDenuncia>>> obtenerDenunciasRechazadas() throws Exception {
+
+        return ResponseEntity.ok().body(new MensajeDTO<>(false, denunciaServicioImp.listarDenunciasRechazadas()));
     }
 
 
