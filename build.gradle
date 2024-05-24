@@ -31,9 +31,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springframework:spring-test'
 }
-test {
-    useJUnitPlatform()
-}
+
 
 configurations.all {
     exclude group: 'commons-logging', module: 'commons-logging'
