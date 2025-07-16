@@ -2,6 +2,7 @@ package com.crisdevApps.Nebra.services.implementations;
 
 import com.crisdevApps.Nebra.dto.inputDto.LoginDTO;
 import com.crisdevApps.Nebra.dto.outputDto.TokenDTO;
+import com.crisdevApps.Nebra.exceptions.EntityNotFoundException;
 import com.crisdevApps.Nebra.exceptions.UnauthorizedException;
 import com.crisdevApps.Nebra.exceptions.ValidationException;
 import com.crisdevApps.Nebra.model.Session;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -62,6 +65,14 @@ public class AuthService implements IAuthService {
 
         return jwtUtil.GenerateToken(user.getId(), user.getEmail(),
                 true, session.getId().toString(), user.getUserRole());
+    }
+
+    @Override
+    public void Logout(String refresh) {
+        UUID sessionId = jwtUtil.GetSessionIdFromRefreshToken(refresh);
+        Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
+        if(sessionOptional.isEmpty()) throw new EntityNotFoundException("Session not found");
+        sessionRepository.delete(sessionOptional.get());
     }
 
 

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IEmailService {
 
-    void SendEmail(EmailDTO emailDTO) throws Exception;
+    void SendEmail(EmailDTO emailDTO, String template, boolean verification);
 }

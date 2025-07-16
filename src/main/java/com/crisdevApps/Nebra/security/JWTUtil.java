@@ -1,5 +1,6 @@
 package com.crisdevApps.Nebra.security;
 
+import com.crisdevApps.Nebra.exceptions.ValidationException;
 import com.crisdevApps.Nebra.model.enums.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -57,13 +58,31 @@ public class JWTUtil {
     }
 
     public UUID GetSessionIdFromRefreshToken(String token){
-        String sessionId =Jwts.parserBuilder()
-                .setSigningKey(secretKey).build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("sessionId", String.class);
 
-        return UUID.fromString(sessionId);
+        try {
+            String sessionId =Jwts.parserBuilder()
+                    .setSigningKey(secretKey).build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("sessionId", String.class);
+
+            return UUID.fromString(sessionId);
+        } catch (SecurityException e) {
+            System.out.println("Invalid JWT signature: " + e.getMessage());
+            throw new ValidationException("Invalid signature");
+        } catch (MalformedJwtException e) {
+            System.out.println("Invalid JWT token: " + e.getMessage());
+            throw new ValidationException("Invalid token");
+        } catch (ExpiredJwtException e) {
+            System.out.println("JWT token is expired: " + e.getMessage());
+            throw new ValidationException("Session expired");
+        } catch (UnsupportedJwtException e) {
+            System.out.println("JWT token is unsupported: " + e.getMessage());
+            throw new ValidationException("Invalid token");
+        } catch (IllegalArgumentException e) {
+            System.out.println("JWT claims string is empty: " + e.getMessage());
+            throw new ValidationException("Invalid token");
+        }
     }
 
 
@@ -109,15 +128,19 @@ public class JWTUtil {
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
         } catch (SecurityException e) {
             System.out.println("Invalid JWT signature: " + e.getMessage());
+            throw new ValidationException("Invalid signature");
         } catch (MalformedJwtException e) {
             System.out.println("Invalid JWT token: " + e.getMessage());
+            throw new ValidationException("Invalid token");
         } catch (ExpiredJwtException e) {
             System.out.println("JWT token is expired: " + e.getMessage());
+            throw new ValidationException("Token expired");
         } catch (UnsupportedJwtException e) {
             System.out.println("JWT token is unsupported: " + e.getMessage());
+            throw new ValidationException("Invalid token");
         } catch (IllegalArgumentException e) {
             System.out.println("JWT claims string is empty: " + e.getMessage());
+            throw new ValidationException("Invalid token");
         }
-        return false;
     }
 }

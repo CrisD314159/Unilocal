@@ -21,7 +21,7 @@ public class ModeratorService implements IModeratorService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailServicioImp;
+    private final EmailService emailService;
 
     @Override
     public void CreateModerator(CreateModeratorDTO createModeratorDTO) throws Exception {
@@ -37,6 +37,13 @@ public class ModeratorService implements IModeratorService {
                 .build();
         userRepository.save(user);
 
-        emailServicioImp.SendEmail(new EmailDTO("Bienvenid@ a Unilocal", "Tu cuenta ha sido creada exitosamente", user.getEmail()));
+        emailService.SendEmail(new EmailDTO(
+                "Welcome to Nebra",
+                "Your moderator account has been successfully created",
+                user.getEmail(),
+                user.getName(),
+                "",
+                "Go to Nebra"
+        ), "templates/generalEmailTemplate.html", false);
     }
 }

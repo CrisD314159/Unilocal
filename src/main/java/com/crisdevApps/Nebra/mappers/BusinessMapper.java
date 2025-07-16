@@ -14,6 +14,7 @@ import java.util.UUID;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface BusinessMapper {
 
+    @Mapping(target = "images", ignore = true)
     Business toEntity(CreateBusinessDTO createBusinessDTO);
 
     @Mapping(target = "ownerId", source = "business.userOwner", qualifiedByName = "userId")

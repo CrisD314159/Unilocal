@@ -8,6 +8,7 @@ import lombok.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,7 +26,7 @@ public class Business implements Serializable {
     private UUID id;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private ArrayList<Image> images;
+    private List<Image> images;
 
     private String description;
 
@@ -44,14 +45,14 @@ public class Business implements Serializable {
     private User userOwner;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
-    private ArrayList<Comment> comments;
+    private List<Comment> comments;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private ArrayList<Revision> revisionsList;
+    private List<Revision> revisionsList;
 
     private BusinessState businessState;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private ArrayList<Schedule> scheduleList;
+    private List<Schedule> scheduleList;
 
 }

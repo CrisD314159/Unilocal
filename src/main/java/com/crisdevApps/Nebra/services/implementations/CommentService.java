@@ -32,7 +32,7 @@ import java.util.UUID;
 public class CommentService implements ICommentService {
 
     private final CommentRepository commentRepository;
-    private final EmailService emailServicioImp;
+    private final EmailService emailService;
     private final IUserService userService;
     private final CommentMapper commentMapper;
     private final IBusinessService businessService;
@@ -58,8 +58,14 @@ public class CommentService implements ICommentService {
 
 
         commentRepository.save(comment);
-        emailServicioImp.SendEmail(new EmailDTO("Nuevo comment en tu publicación",
-                    "<h1>Hay un nuevo comment en tu publicación </h1> </br> <b> El comment es el siguiente: </b>"+ comment.getContent(), email));
+        emailService.SendEmail(new EmailDTO(
+                "New comment",
+                "Hello, there is a new comment on your business called " + business.getName(),
+                email,
+                business.getUserOwner().getName(),
+                "",
+                "Go to Nebra"
+        ), "templates/generalEmailTemplate.html", false);
     }
 
 

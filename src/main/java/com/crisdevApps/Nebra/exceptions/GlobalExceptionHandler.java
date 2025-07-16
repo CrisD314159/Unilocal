@@ -61,4 +61,11 @@ public class GlobalExceptionHandler {
                 new ErrorMessage<>(false, e.getMessage())
         );
     }
+
+    @ExceptionHandler(UnexpectedException.class)
+    public ResponseEntity<ErrorMessage<String>> unexpectedExceptionHandler(UnexpectedException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ErrorMessage<>(false, e.getMessage())
+        );
+    }
 }

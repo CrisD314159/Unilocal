@@ -5,11 +5,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.web.multipart.MultipartFile;
 
 public record CreateUserDTO(
         @NotBlank @Length(max = 50) String name,
 
-        @NotBlank Image profilePicture,
+        @NotBlank MultipartFile profilePicture,
 
 
        @NotBlank @Email String email,

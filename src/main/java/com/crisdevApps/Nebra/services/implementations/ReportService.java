@@ -35,11 +35,11 @@ public class ReportService implements IReportService {
 
     private final ReportRepository reportRepository;
     private final IBusinessService businessService;
-    private final EmailService emailServicioImp;
+    private final EmailService emailService;
     private final ReportMapper reportMapper;
     private final IUserService userService;
     @Override
-    public boolean CreateReport(CreateReportDTO createReportDTO) {
+    public void CreateReport(CreateReportDTO createReportDTO) {
         Business business = businessService.GetValidBusiness(createReportDTO.businessId());
         User user = userService.FindValidUserById(createReportDTO.userId());
         Report report = Report.builder()
@@ -53,7 +53,7 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public boolean AcceptReport(UUID reportId, UUID userId) {
+    public void AcceptReport(UUID reportId, UUID userId) {
         User user = userService.FindValidUserById(userId);
         if(user.getUserRole().equals(UserRole.USER))
             throw new ValidationException("You are not authorized to execute this action");
@@ -73,16 +73,27 @@ public class ReportService implements IReportService {
 
         reportRepository.save(report);
 
+        emailService.SendEmail(new EmailDTO(
+                "Your report has been accepted",
+                "After reviewing your report, we decided to remove this business from our platform does not meet the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team.",
+                report.getUser().getEmail(),
+                report.getUser().getName(),
+                "",
+                "Go to Nebra"
+        ), "templates/generalEmailTemplate.html", false);
 
-        emailServicioImp.SendEmail(new EmailDTO("Your report has been accepted",
-                "After reviewing your report, we decided to remove this business from our platform does not meet the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team.", report.getUser().getEmail()));
-        emailServicioImp.SendEmail(new EmailDTO("Your business has been removed from our",
-                "After reviewing other users reports about your business, we decided to remove it from our platform. Your business does not meet the required standards of accuracy, trust, and user safety.\n" +
-                        "Sincerely, Nebra team.", reportBusiness.getUserOwner().getEmail()));
+        emailService.SendEmail(new EmailDTO(
+                "Your business has been removed from our platform",
+                "After reviewing other users reports about your business, we decided to remove it from our platform. Your business does not meet the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team.",
+                reportBusiness.getUserOwner().getEmail(),
+                reportBusiness.getUserOwner().getName(),
+                "",
+                "Go to Nebra"
+        ), "templates/generalEmailTemplate.html", false);
     }
 
     @Override
-    public boolean RejectReport(UUID reportId){
+    public void RejectReport(UUID reportId){
         Optional<Report> denunciaOptional = reportRepository.findByIdAndReportState(reportId, ReportState.PENDING);
         if (denunciaOptional.isEmpty()){
             throw new EntityNotFoundException("Report not found");
@@ -94,9 +105,14 @@ public class ReportService implements IReportService {
 
         reportRepository.save(report);
 
-        emailServicioImp.SendEmail(new EmailDTO("You report has been rejected",
-                "After reviewing your report, we decided to NOT remove this business from our platform. This business meets the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team."
-                , report.getUser().getEmail()));
+        emailService.SendEmail(new EmailDTO(
+                "You report has been rejected",
+                "After reviewing your report, we decided to NOT remove this business from our platform. This business meets the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team.",
+                report.getUser().getEmail(),
+                report.getUser().getName(),
+                "",
+                "Go to Nebra"
+        ), "templates/generalEmailTemplate.html", false);
     }
 
     @Override

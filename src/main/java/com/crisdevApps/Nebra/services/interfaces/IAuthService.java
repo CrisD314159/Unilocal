@@ -10,4 +10,6 @@ public interface IAuthService {
     TokenDTO Login(LoginDTO loginDTO) throws Exception;
 
     String CreateSession(User user);
+
+    void Logout(String refresh);
 }

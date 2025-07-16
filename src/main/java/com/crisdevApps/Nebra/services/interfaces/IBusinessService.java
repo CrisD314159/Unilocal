@@ -1,14 +1,15 @@
 package com.crisdevApps.Nebra.services.interfaces;
 
 
+import com.crisdevApps.Nebra.dto.inputDto.StoreBusinessImagesDTO;
 import com.crisdevApps.Nebra.dto.inputDto.UpdateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CreateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CrearRevisionDTO;
 import com.crisdevApps.Nebra.dto.outputDto.GetBusinessDTO;
-import com.crisdevApps.Nebra.dto.outputDto.ObtenerNegocioDTO;
 import com.crisdevApps.Nebra.model.Business;
 import com.crisdevApps.Nebra.model.enums.BusinessCategory;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +20,9 @@ public interface IBusinessService {
 
     void UpdateBusiness(UpdateBusinessDTO updateBusinessDTO, UUID userId);
 
-    boolean DeleteBusiness(UUID businessId, UUID userId) ;
+    void DeleteBusiness(UUID businessId, UUID userId) ;
+
+    void StoreBusinessImages(StoreBusinessImagesDTO storeBusinessImagesDTO);
 
     List<GetBusinessDTO> SearchBusiness(String search, int page);
 
@@ -33,7 +36,6 @@ public interface IBusinessService {
 
     void RepublishBusiness(UUID businessId, UUID userId);
 
-    boolean CreateBusinessRevision(CrearRevisionDTO crearRevisionDTO);
 
     Business GetValidBusiness(UUID businessId);
 

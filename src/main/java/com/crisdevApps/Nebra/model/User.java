@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -32,17 +33,17 @@ public class User  implements Serializable {
     private Image profilePicture;
     private String location;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private ArrayList<Comment> comments;
+    private List<Comment> comments;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private ArrayList<Business> businessList;
+    private List<Business> businessList;
     @OneToMany(fetch = FetchType.EAGER)
-    private ArrayList<Report> reports;
+    private List<Report> reports;
     private UserState userState;
     private UserRole userRole;
     private boolean isThirdPartyUser;
     private String verificationCode;
     private String recoveryAccountToken;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private ArrayList<Business> favoriteBusiness;
+    private List<Business> favoriteBusiness;
 
 }

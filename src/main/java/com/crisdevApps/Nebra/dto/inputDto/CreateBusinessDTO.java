@@ -14,7 +14,6 @@ public record CreateBusinessDTO(
         @NotBlank String description,
         @NotBlank String name,
         @NotEmpty String phoneContact,
-        ArrayList<Image> images,
         BusinessCategory category,
         Coordinate location,
         @NotEmpty ArrayList<Schedule> scheduleList

@@ -1,5 +1,6 @@
 package com.crisdevApps.Nebra.services.implementations;
 
+import com.crisdevApps.Nebra.dto.inputDto.StoreBusinessImagesDTO;
 import com.crisdevApps.Nebra.dto.inputDto.UpdateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CreateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CrearRevisionDTO;
@@ -16,6 +17,7 @@ import com.crisdevApps.Nebra.repositories.UserRepository;
 import com.crisdevApps.Nebra.services.interfaces.IBusinessService;
 import com.crisdevApps.Nebra.repositories.BusinessRepository;
 import com.crisdevApps.Nebra.services.interfaces.ICommentService;
+import com.crisdevApps.Nebra.services.interfaces.IImageService;
 import com.crisdevApps.Nebra.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,7 +40,7 @@ public class BusinessService implements IBusinessService {
     private final IUserService userService;
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
-    private final ImageService imagenesServicioImp;
+    private final IImageService imageService;
     private final ICommentService commentService;
     private final BusinessMapper businessMapper;
     @Override
@@ -49,22 +51,25 @@ public class BusinessService implements IBusinessService {
         }
 
         Business business = businessMapper.toEntity(createBusinessDTO);
+        business.setImages(new ArrayList<>());
         business.setBusinessState(BusinessState.ACTIVE);
         business.setDateCreated(LocalDateTime.now());
 
         businessRepository.save(business);
     }
 
-    private ArrayList<Image> almacenarImagenes(ArrayList<String> imagenes) {
-        ArrayList<Image> listaImagenes = new ArrayList<>();
+    @Override
+    public void StoreBusinessImages(StoreBusinessImagesDTO storeBusinessImagesDTO) {
+        Business business = GetValidBusiness(storeBusinessImagesDTO.businessId());
 
-
-        for(String item: imagenes){
-            Image image = new Image(item, null);
-            listaImagenes.add(image);
+        if(!business.getImages().isEmpty()){
+            imageService.DeleteSeveral(business.getImages());
         }
 
-        return  listaImagenes;
+        List<Image> imagesUploaded = imageService.UploadSeveralImages(storeBusinessImagesDTO.images());
+        business.setImages(imagesUploaded);
+        businessRepository.save(business);
+
     }
 
 
@@ -92,7 +97,7 @@ public class BusinessService implements IBusinessService {
     }
 
     @Override
-    public boolean DeleteBusiness(UUID businessId, UUID userId) {
+    public void DeleteBusiness(UUID businessId, UUID userId) {
         User user = userService.FindValidUserById(userId);
         Optional<Business> businessOptional = businessRepository.findByIdAndUserOwner(businessId, user);
 
@@ -108,8 +113,8 @@ public class BusinessService implements IBusinessService {
         business.setBusinessState(BusinessState.INACTIVE);
 
         businessRepository.save(business);
-        return true;
     }
+
 
     @Override
     public List<GetBusinessDTO> SearchBusiness(String search, int page) {
@@ -135,7 +140,7 @@ public class BusinessService implements IBusinessService {
     }
 
     @Override
-    public List<GetBusinessDTO> FilterBusinessByCategory(BusinessCategory businessCategory, int page) throws Exception {
+    public List<GetBusinessDTO> FilterBusinessByCategory(BusinessCategory businessCategory, int page) {
         Pageable pageable = PageRequest.of(page, 10);
 
         Page<Business> businessPage = businessRepository.findByCategoryAndBusinessState(businessCategory,
@@ -148,7 +153,7 @@ public class BusinessService implements IBusinessService {
     }
 
     @Override
-    public List<GetBusinessDTO> GetUserBusiness(UUID userId, int page) throws Exception {
+    public List<GetBusinessDTO> GetUserBusiness(UUID userId, int page){
         User user = userService.FindValidUserById(userId);
         Pageable pageable = PageRequest.of(page, 10);
         Page<Business> businessPage = businessRepository.findByUserOwnerAndBusinessState(user, BusinessState.ACTIVE,
@@ -187,11 +192,6 @@ public class BusinessService implements IBusinessService {
 
 
     @Override
-    public boolean CreateBusinessRevision(CrearRevisionDTO crearRevisionDTO) {
-        return false;
-    }
-
-    @Override
     public Business GetValidBusiness(UUID businessId) {
         Optional<Business> businessOptional = businessRepository
                 .findByIdAndBusinessState(businessId, BusinessState.ACTIVE);
@@ -223,7 +223,7 @@ public class BusinessService implements IBusinessService {
     @Override
     public List<GetBusinessDTO> GetUserFavoriteBusiness(UUID userId){
         User user = userService.FindValidUserById(userId);
-        ArrayList<Business> userBusiness = user.getFavoriteBusiness();
+        List<Business> userBusiness = user.getFavoriteBusiness();
 
         return userBusiness.stream().map(business -> {
             int score = commentService.CalculateBusinessAverageScore(business.getId());
