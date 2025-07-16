@@ -30,7 +30,7 @@ public class User  implements Serializable {
     private String password;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Image profilePicture;
-    private String address;
+    private String location;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private ArrayList<Comment> comments;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -41,6 +41,7 @@ public class User  implements Serializable {
     private UserRole userRole;
     private boolean isThirdPartyUser;
     private String verificationCode;
+    private String recoveryAccountToken;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private ArrayList<Business> favoriteBusiness;
 

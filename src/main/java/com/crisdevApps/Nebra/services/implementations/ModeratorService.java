@@ -30,7 +30,7 @@ public class ModeratorService implements IModeratorService {
                 .isThirdPartyUser(false)
                 .userRole(UserRole.MODERATOR)
                 .userState(UserState.ACTIVE)
-                .address("Nebra Admin")
+                .location("Nebra Admin")
                 .email(createModeratorDTO.email())
                 .name(createModeratorDTO.name())
                 .password(passwordEncoder.encode(createModeratorDTO.password()))

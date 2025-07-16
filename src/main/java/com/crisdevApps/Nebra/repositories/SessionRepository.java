@@ -1,4 +1,4 @@
-package com.crisdevApps.Nebra.services.interfaces;
+package com.crisdevApps.Nebra.repositories;
 
 import com.crisdevApps.Nebra.model.Session;
 import org.springframework.data.jpa.repository.JpaRepository;

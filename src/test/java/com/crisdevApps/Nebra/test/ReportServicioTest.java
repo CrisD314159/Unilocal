@@ -1,6 +1,6 @@
 package com.crisdevApps.Nebra.test;
 
-import com.crisdevApps.Nebra.dto.inputDto.CrearDenunciaDTO;
+import com.crisdevApps.Nebra.dto.inputDto.CreateReportDTO;
 import com.crisdevApps.Nebra.services.implementations.ReportService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ public class ReportServicioTest {
 
     @Test
     public void crearDenunciaTest(){
-        CrearDenunciaDTO crearDenunciaDTO = new CrearDenunciaDTO(
+        CreateReportDTO createReportDTO = new CreateReportDTO(
                 "66078d1c68de9f284821bfaf",
                 "66098099c213596ba18c73c3",
                "El lugar tiene images explicitas, ademas de que no existe"
@@ -24,7 +24,7 @@ public class ReportServicioTest {
         boolean resultado;
 
         try {
-            resultado = denunciaServicioImp.CreateReport(crearDenunciaDTO);
+            resultado = denunciaServicioImp.CreateReport(createReportDTO);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

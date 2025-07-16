@@ -2,6 +2,8 @@ package com.crisdevApps.Nebra.repositories;
 
 import com.crisdevApps.Nebra.model.Report;
 import com.crisdevApps.Nebra.model.enums.ReportState;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,10 +15,10 @@ import java.util.UUID;
 public interface ReportRepository extends JpaRepository<Report, UUID> {
 
 
-    Optional<Report> findByIdDenunciaAndEstadoDenuncia(String id, ReportState reportState);
+    Optional<Report> findByIdAndReportState(UUID id, ReportState reportState);
 
 
-    ArrayList<Report> findAllNotRejected(ReportState reportState);
+    Page<Report> findByReportState(ReportState reportState, Pageable pageable);
 
 
     ArrayList<Report> findAllRejected(ReportState reportState);

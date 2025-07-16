@@ -1,7 +1,7 @@
 package com.crisdevApps.Nebra.controladores;
 
 import com.crisdevApps.Nebra.dto.inputDto.ChangePasswordDTO;
-import com.crisdevApps.Nebra.dto.outputDto.DetalleUsuarioDTO;
+import com.crisdevApps.Nebra.dto.outputDto.GetUserProfileDTO;
 import com.crisdevApps.Nebra.dto.outputDto.ErrorMessage;
 import com.crisdevApps.Nebra.services.implementations.UserService;
 import jakarta.validation.Valid;
@@ -29,7 +29,7 @@ public class UtilsPublicControlador {
     }
 
     @GetMapping("/recuperar/get-cliente/{codigo}")
-    public ResponseEntity<ErrorMessage<DetalleUsuarioDTO>> obtenerCliente(@PathVariable String codigo) throws Exception{
+    public ResponseEntity<ErrorMessage<GetUserProfileDTO>> obtenerCliente(@PathVariable String codigo) throws Exception{
         return ResponseEntity.ok().body(new ErrorMessage<>(false,  usuarioServicioImp.GetUserProfile(codigo)));
     }
 }

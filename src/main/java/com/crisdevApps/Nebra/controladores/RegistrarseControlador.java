@@ -1,7 +1,7 @@
 package com.crisdevApps.Nebra.controladores;
 
 import com.crisdevApps.Nebra.dto.outputDto.ErrorMessage;
-import com.crisdevApps.Nebra.dto.inputDto.RegistroClienteDTO;
+import com.crisdevApps.Nebra.dto.inputDto.CreateUserDTO;
 import com.crisdevApps.Nebra.services.implementations.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +18,8 @@ public class RegistrarseControlador {
     private final UserService usuarioServicioImp;
 
     @PostMapping("/registrar-cliente")
-    public ResponseEntity<ErrorMessage<String>> registrarUsuario(@Valid @RequestBody RegistroClienteDTO registroClienteDTO)throws Exception{
-        usuarioServicioImp.SignUp(registroClienteDTO);
+    public ResponseEntity<ErrorMessage<String>> registrarUsuario(@Valid @RequestBody CreateUserDTO createUserDTO)throws Exception{
+        usuarioServicioImp.SignUp(createUserDTO);
         return ResponseEntity.ok().body(new ErrorMessage<>(false, "User registrado exitosamente"));
     }
 }

@@ -2,7 +2,7 @@ package com.crisdevApps.Nebra.controladores;
 
 import co.crisdevApps.Nebra.dto.*;
 import co.edu.uniquindio.proyecto.dto.*;
-import com.crisdevApps.Nebra.dto.inputDto.ActualizarUsuarioDTO;
+import com.crisdevApps.Nebra.dto.inputDto.UpdateUserDTO;
 import com.crisdevApps.Nebra.dto.inputDto.FavoritoDTO;
 import com.crisdevApps.Nebra.dto.outputDto.*;
 import com.crisdevApps.Nebra.services.implementations.UserService;
@@ -26,13 +26,13 @@ public class ClienteControlador {
     }
 
     @PutMapping("/actualizar-cliente")
-    public ResponseEntity<ErrorMessage<String>> actualizarUsuario(@Valid @RequestBody ActualizarUsuarioDTO actualizarUsuarioDTO)throws Exception{
-        usuarioServicioImp.EditProfile(actualizarUsuarioDTO);
+    public ResponseEntity<ErrorMessage<String>> actualizarUsuario(@Valid @RequestBody UpdateUserDTO updateUserDTO)throws Exception{
+        usuarioServicioImp.EditProfile(updateUserDTO);
         return ResponseEntity.ok().body(new ErrorMessage<>(false, "El usuario ha sido actualizado"));
     }
 
     @GetMapping("/{codigo}")
-    public ResponseEntity<ErrorMessage<DetalleUsuarioDTO>> obtenerCliente(@PathVariable String codigo) throws Exception{
+    public ResponseEntity<ErrorMessage<GetUserProfileDTO>> obtenerCliente(@PathVariable String codigo) throws Exception{
         return ResponseEntity.ok().body(new ErrorMessage<>(false,  usuarioServicioImp.GetUserProfile(codigo)));
     }
 

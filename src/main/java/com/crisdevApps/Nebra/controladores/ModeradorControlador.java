@@ -1,6 +1,6 @@
 package com.crisdevApps.Nebra.controladores;
 
-import com.crisdevApps.Nebra.dto.outputDto.DetalleDenuncia;
+import com.crisdevApps.Nebra.dto.outputDto.GetReportDTO;
 import com.crisdevApps.Nebra.dto.outputDto.ErrorMessage;
 import com.crisdevApps.Nebra.services.implementations.ReportService;
 import com.crisdevApps.Nebra.services.implementations.ModeratorService;
@@ -36,7 +36,7 @@ public class ModeradorControlador {
     }
 
     @GetMapping("/listar-denuncias")
-    public  ResponseEntity<ErrorMessage<List<DetalleDenuncia>>> listarDenuncias() throws Exception {
+    public  ResponseEntity<ErrorMessage<List<GetReportDTO>>> listarDenuncias() throws Exception {
         return ResponseEntity.ok().body(new ErrorMessage<>(false, denunciaServicioImp.GetReports()));
     }
 

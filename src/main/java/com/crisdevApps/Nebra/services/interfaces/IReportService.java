@@ -1,21 +1,35 @@
 package com.crisdevApps.Nebra.services.interfaces;
 
-import com.crisdevApps.Nebra.dto.inputDto.CrearDenunciaDTO;
-import com.crisdevApps.Nebra.dto.outputDto.DetalleDenuncia;
+import com.crisdevApps.Nebra.dto.inputDto.CreateReportDTO;
+import com.crisdevApps.Nebra.dto.inputDto.EmailDTO;
+import com.crisdevApps.Nebra.dto.outputDto.GetReportDTO;
+import com.crisdevApps.Nebra.exceptions.EntityNotFoundException;
+import com.crisdevApps.Nebra.exceptions.ValidationException;
+import com.crisdevApps.Nebra.model.Business;
+import com.crisdevApps.Nebra.model.Report;
+import com.crisdevApps.Nebra.model.User;
+import com.crisdevApps.Nebra.model.enums.BusinessState;
+import com.crisdevApps.Nebra.model.enums.ReportState;
+import com.crisdevApps.Nebra.model.enums.UserRole;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface IReportService {
 
-    boolean CreateReport(CrearDenunciaDTO crearDenunciaDTO) throws Exception;
-    boolean AcceptReport(String idDenuncia) throws Exception;
-    boolean RejectReport(String idDenuncia) throws Exception;
+    boolean CreateReport(CreateReportDTO createReportDTO);
 
-    List<DetalleDenuncia> GetReports();
+    boolean AcceptReport(UUID reportId, UUID userId);
 
-    DetalleDenuncia GetSpecificReport(String codigo) throws Exception;
+    boolean RejectReport(UUID reportId);
 
-    List<DetalleDenuncia> GetRejectedReports() throws Exception;
+    List<GetReportDTO> GetPendingReports(int page);
+
+    List<GetReportDTO> GetRejectedReports(int page);
+
+
+    List<GetReportDTO> GetAcceptedReports(int page);
 }

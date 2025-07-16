@@ -1,23 +1,32 @@
 package com.crisdevApps.Nebra.services.implementations;
 
-import com.crisdevApps.Nebra.dto.inputDto.CrearDenunciaDTO;
-import com.crisdevApps.Nebra.dto.outputDto.DetalleDenuncia;
-import com.crisdevApps.Nebra.dto.outputDto.DetalleUsuarioDTO;
+import com.crisdevApps.Nebra.dto.inputDto.CreateReportDTO;
+import com.crisdevApps.Nebra.dto.outputDto.GetReportDTO;
 import com.crisdevApps.Nebra.dto.inputDto.EmailDTO;
+import com.crisdevApps.Nebra.exceptions.EntityNotFoundException;
+import com.crisdevApps.Nebra.exceptions.ValidationException;
+import com.crisdevApps.Nebra.mappers.ReportMapper;
 import com.crisdevApps.Nebra.model.Report;
 import com.crisdevApps.Nebra.model.Business;
+import com.crisdevApps.Nebra.model.User;
 import com.crisdevApps.Nebra.model.enums.BusinessState;
 import com.crisdevApps.Nebra.model.enums.ReportState;
+import com.crisdevApps.Nebra.model.enums.UserRole;
+import com.crisdevApps.Nebra.services.interfaces.IBusinessService;
 import com.crisdevApps.Nebra.services.interfaces.IReportService;
 import com.crisdevApps.Nebra.repositories.ReportRepository;
-import com.crisdevApps.Nebra.repositories.BusinessRepository;
+import com.crisdevApps.Nebra.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -25,101 +34,92 @@ import java.util.Optional;
 public class ReportService implements IReportService {
 
     private final ReportRepository reportRepository;
-    private final BusinessRepository businessRepository;
+    private final IBusinessService businessService;
     private final EmailService emailServicioImp;
-    private final UserService usuarioServicioImp;
+    private final ReportMapper reportMapper;
+    private final IUserService userService;
     @Override
-    public boolean CreateReport(CrearDenunciaDTO crearDenunciaDTO) throws Exception {
-
-        Report report = new Report();
-        report.setEstadoDenuncia(ReportState.PENDING);
-        report.setIdlugar(crearDenunciaDTO.idNegocio());
-        report.setIdUsuario(crearDenunciaDTO.idUsuario());
-        report.setMotivo(crearDenunciaDTO.motivo());
-
-        try {
-            reportRepository.save(report);
-        } catch (Exception e) {
-            throw new Exception("Ocurrió un success con la base de datos");
-        }
-        return true;
+    public boolean CreateReport(CreateReportDTO createReportDTO) {
+        Business business = businessService.GetValidBusiness(createReportDTO.businessId());
+        User user = userService.FindValidUserById(createReportDTO.userId());
+        Report report = Report.builder()
+                .reportState(ReportState.PENDING)
+                .answer("")
+                .business(business)
+                .user(user)
+                .reason(createReportDTO.reason())
+                .build();
+        reportRepository.save(report);
     }
 
     @Override
-    public boolean AcceptReport(String idDenuncia) throws Exception {
-        Optional<Report> denunciaOptional = reportRepository.findByIdDenunciaAndEstadoDenuncia(idDenuncia, ReportState.PENDING);
+    public boolean AcceptReport(UUID reportId, UUID userId) {
+        User user = userService.FindValidUserById(userId);
+        if(user.getUserRole().equals(UserRole.USER))
+            throw new ValidationException("You are not authorized to execute this action");
+
+        Optional<Report> denunciaOptional = reportRepository.findByIdAndReportState(reportId, ReportState.PENDING);
         if (denunciaOptional.isEmpty()){
-            throw new Exception("No se pudo encontrar la report");
+            throw new EntityNotFoundException("Report not found");
         }
 
         Report report = denunciaOptional.get();
-        String idLugar = report.getIdlugar();
-        Optional<Business> lugarOptional = businessRepository.findById(idLugar);
-        if (lugarOptional.isEmpty()) throw new Exception("Business no encontrado");
-        Business business = lugarOptional.get();
-        business.setEstadoLugar(BusinessState.INACTIVE);
-        report.setEstadoDenuncia(ReportState.ACCEPTED);
+        Business reportBusiness = report.getBusiness();
+        if(reportBusiness.getBusinessState() != BusinessState.ACTIVE)
+            throw new ValidationException("Business not found");
 
-        try {
-            businessRepository.save(business);
-            reportRepository.save(report);
+        reportBusiness.setBusinessState(BusinessState.ACTIVE);
+        report.setReportState(ReportState.ACCEPTED);
+
+        reportRepository.save(report);
 
 
-        } catch (Exception e) {
-            throw new Exception("Ocurrió un success con el servidor");
-        }
-        DetalleUsuarioDTO detalleUsuarioDTO = usuarioServicioImp.GetUserProfile(report.getIdUsuario());
-        emailServicioImp.SendEmail(new EmailDTO("Report aceptada", "Su report ha sido aceptada exitosamente", detalleUsuarioDTO.email()));
-        return true;
+        emailServicioImp.SendEmail(new EmailDTO("Your report has been accepted",
+                "After reviewing your report, we decided to remove this business from our platform does not meet the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team.", report.getUser().getEmail()));
+        emailServicioImp.SendEmail(new EmailDTO("Your business has been removed from our",
+                "After reviewing other users reports about your business, we decided to remove it from our platform. Your business does not meet the required standards of accuracy, trust, and user safety.\n" +
+                        "Sincerely, Nebra team.", reportBusiness.getUserOwner().getEmail()));
     }
 
     @Override
-    public boolean RejectReport(String idDenuncia) throws Exception {
-        Optional<Report> denunciaOptional = reportRepository.findByIdDenunciaAndEstadoDenuncia(idDenuncia, ReportState.PENDING);
+    public boolean RejectReport(UUID reportId){
+        Optional<Report> denunciaOptional = reportRepository.findByIdAndReportState(reportId, ReportState.PENDING);
         if (denunciaOptional.isEmpty()){
-            throw new Exception("No se pudo encontrar la report");
+            throw new EntityNotFoundException("Report not found");
         }
 
         Report report = denunciaOptional.get();
-        if (report.getEstadoDenuncia() == ReportState.REJECTED){
-            throw new Exception("La report ya habia sido rechazada");
-        }
 
-        report.setEstadoDenuncia(ReportState.REJECTED);
+        report.setReportState(ReportState.REJECTED);
 
-        try {
-            reportRepository.save(report);
-        } catch (Exception e) {
-            throw new Exception("Ocurrió un success con el servidor");
-        }
-        DetalleUsuarioDTO detalleUsuarioDTO = usuarioServicioImp.GetUserProfile(report.getIdUsuario());
-        emailServicioImp.SendEmail(new EmailDTO("Report Rechazada", "Su report ha sido rechazada", detalleUsuarioDTO.email()));
-        return true;
+        reportRepository.save(report);
+
+        emailServicioImp.SendEmail(new EmailDTO("You report has been rejected",
+                "After reviewing your report, we decided to NOT remove this business from our platform. This business meets the required standards of accuracy, trust, and user safety.\n" + "Sincerely, Nebra team."
+                , report.getUser().getEmail()));
     }
 
     @Override
-    public List<DetalleDenuncia> GetReports() {
-        ArrayList<Report> reports = reportRepository.findAllNotRejected(ReportState.PENDING);
-        return reports.stream().map(d -> new DetalleDenuncia(d.getCodigo(), d.getIdUsuario(), d.getIdlugar(), d.getMotivo())).toList();
+    public List<GetReportDTO> GetPendingReports(int page) {
+        return GetReportsByIdAndState(page, ReportState.PENDING);
+    }
+
+    @Override
+    public List<GetReportDTO> GetRejectedReports(int page) {
+        return GetReportsByIdAndState(page, ReportState.REJECTED);
 
     }
 
     @Override
-    public List<DetalleDenuncia> GetRejectedReports() throws Exception {
-        ArrayList<Report> reports = reportRepository.findAllRejected(ReportState.REJECTED);
-        return reports.stream().map(d -> new DetalleDenuncia(d.getCodigo(), d.getIdUsuario(), d.getIdlugar(), d.getMotivo())).toList();
+    public List<GetReportDTO> GetAcceptedReports(int page){
+        return GetReportsByIdAndState(page, ReportState.ACCEPTED);
 
     }
 
-    @Override
-    public DetalleDenuncia GetSpecificReport(String codigo) throws Exception {
-        Optional<Report> denunciaOptional = reportRepository.findById(codigo);
-        if (denunciaOptional.isEmpty()){
-            throw new Exception("No se pudo encontrar la report");
-        }
-        Report report = denunciaOptional.get();
-        return new DetalleDenuncia(report.getCodigo(), report.getIdUsuario(), report.getIdlugar(), report.getMotivo());
+    public List<GetReportDTO> GetReportsByIdAndState(int page, ReportState reportState){
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Report> reports = reportRepository.findByReportState(reportState, pageable);
+        return reports.stream().map(reportMapper::toDto).toList();
     }
-
 
 }

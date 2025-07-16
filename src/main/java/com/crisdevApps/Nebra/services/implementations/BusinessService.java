@@ -12,6 +12,7 @@ import com.crisdevApps.Nebra.model.Image;
 import com.crisdevApps.Nebra.model.User;
 import com.crisdevApps.Nebra.model.enums.BusinessCategory;
 import com.crisdevApps.Nebra.model.enums.BusinessState;
+import com.crisdevApps.Nebra.repositories.UserRepository;
 import com.crisdevApps.Nebra.services.interfaces.IBusinessService;
 import com.crisdevApps.Nebra.repositories.BusinessRepository;
 import com.crisdevApps.Nebra.services.interfaces.ICommentService;
@@ -36,6 +37,7 @@ public class BusinessService implements IBusinessService {
 
     private final IUserService userService;
     private final BusinessRepository businessRepository;
+    private final UserRepository userRepository;
     private final ImageService imagenesServicioImp;
     private final ICommentService commentService;
     private final BusinessMapper businessMapper;
@@ -197,6 +199,36 @@ public class BusinessService implements IBusinessService {
             throw  new EntityNotFoundException("Business not found");
         }
         return businessOptional.get();
+    }
+
+    @Override
+    public void AddBusinessToUserFavorites(UUID businessId, UUID userId){
+        User user = userService.FindValidUserById(userId);
+        Business business = GetValidBusiness(businessId);
+        user.getFavoriteBusiness().add(business);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public void RemoveBusinessFromUserFavorites(UUID businessId, UUID userId){
+        User user = userService.FindValidUserById(userId);
+        Business business = GetValidBusiness(businessId);
+        user.getFavoriteBusiness().remove(business);
+
+        userRepository.save(user);
+
+    }
+
+    @Override
+    public List<GetBusinessDTO> GetUserFavoriteBusiness(UUID userId){
+        User user = userService.FindValidUserById(userId);
+        ArrayList<Business> userBusiness = user.getFavoriteBusiness();
+
+        return userBusiness.stream().map(business -> {
+            int score = commentService.CalculateBusinessAverageScore(business.getId());
+            return businessMapper.toDTO(business, score);
+        }).toList();
     }
 
 }

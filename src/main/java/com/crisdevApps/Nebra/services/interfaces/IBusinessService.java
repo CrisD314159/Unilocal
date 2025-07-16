@@ -5,6 +5,7 @@ import com.crisdevApps.Nebra.dto.inputDto.UpdateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CreateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CrearRevisionDTO;
 import com.crisdevApps.Nebra.dto.outputDto.GetBusinessDTO;
+import com.crisdevApps.Nebra.dto.outputDto.ObtenerNegocioDTO;
 import com.crisdevApps.Nebra.model.Business;
 import com.crisdevApps.Nebra.model.enums.BusinessCategory;
 import org.springframework.stereotype.Repository;
@@ -35,5 +36,11 @@ public interface IBusinessService {
     boolean CreateBusinessRevision(CrearRevisionDTO crearRevisionDTO);
 
     Business GetValidBusiness(UUID businessId);
+
+    void AddBusinessToUserFavorites(UUID businessId, UUID userId);
+
+    void RemoveBusinessFromUserFavorites(UUID businessId, UUID userId);
+
+    List<GetBusinessDTO> GetUserFavoriteBusiness(UUID userId);
 
 }

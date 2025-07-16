@@ -1,8 +1,8 @@
 package com.crisdevApps.Nebra.services.interfaces;
 
-import com.crisdevApps.Nebra.dto.inputDto.ActualizarUsuarioDTO;
-import com.crisdevApps.Nebra.dto.inputDto.RegistroClienteDTO;
-import com.crisdevApps.Nebra.dto.outputDto.DetalleUsuarioDTO;
+import com.crisdevApps.Nebra.dto.inputDto.UpdateUserDTO;
+import com.crisdevApps.Nebra.dto.inputDto.CreateUserDTO;
+import com.crisdevApps.Nebra.dto.outputDto.GetUserProfileDTO;
 import com.crisdevApps.Nebra.dto.outputDto.ItemUsuarioDTO;
 import com.crisdevApps.Nebra.dto.outputDto.ObtenerNegocioDTO;
 import com.crisdevApps.Nebra.model.User;
@@ -12,23 +12,16 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface IUserService extends IAccountService {
+public interface IUserService{
 
-    boolean SignUp(RegistroClienteDTO registroClienteDTO) throws  Exception;
+    void SignUp(CreateUserDTO createUserDTO);
 
-    boolean EditProfile(ActualizarUsuarioDTO actualizarUsuarioDTO)  throws  Exception;
+    void EditProfile(UpdateUserDTO updateUserDTO);
 
-    DetalleUsuarioDTO GetUserProfile(String id) throws Exception;
 
-    List<ItemUsuarioDTO> GetUsers(int pagina);
+    GetUserProfileDTO GetUserProfile(UUID userId);
 
-    void AddBusinessToUserFavorites(String codigo, String idNegocio) throws Exception;
-
-    void RemoveBusinessFromUserFavorites(String codigo, String idNegocio) throws Exception;
-
-    List<ObtenerNegocioDTO> GetUserFavoriteBusiness(String codigo) throws Exception;
-
-    boolean SearchFavoriteBusiness(String codigo, String idNegocio) throws Exception;
+    List<GetUserProfileDTO> GetUsers(String search, int page);
 
     User FindValidUserByEmail(String email);
 

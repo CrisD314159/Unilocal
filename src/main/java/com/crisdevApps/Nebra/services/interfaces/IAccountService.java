@@ -3,12 +3,14 @@ package com.crisdevApps.Nebra.services.interfaces;
 import com.crisdevApps.Nebra.dto.inputDto.ChangePasswordDTO;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
 public interface IAccountService {
-    boolean DeleteAccount(String idUsuario)  throws  Exception;
+    void DeleteAccount(UUID userId);
 
-    void ChangePassword(ChangePasswordDTO changePasswordDTO)  throws  Exception;
+    void ChangePassword(ChangePasswordDTO changePasswordDTO);
 
-    void SendRecoveryLink(String correo)  throws  Exception;
+    void SendRecoveryLink(String correo) ;
 
 }

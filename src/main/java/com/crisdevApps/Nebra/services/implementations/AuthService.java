@@ -2,29 +2,23 @@ package com.crisdevApps.Nebra.services.implementations;
 
 import com.crisdevApps.Nebra.dto.inputDto.LoginDTO;
 import com.crisdevApps.Nebra.dto.outputDto.TokenDTO;
-import com.crisdevApps.Nebra.exceptions.EntityNotFoundException;
 import com.crisdevApps.Nebra.exceptions.UnauthorizedException;
 import com.crisdevApps.Nebra.exceptions.ValidationException;
 import com.crisdevApps.Nebra.model.Session;
 import com.crisdevApps.Nebra.model.User;
-import com.crisdevApps.Nebra.model.enums.UserState;
 import com.crisdevApps.Nebra.security.JWTUtil;
 import com.crisdevApps.Nebra.services.interfaces.IAuthService;
 import com.crisdevApps.Nebra.repositories.UserRepository;
 import com.crisdevApps.Nebra.services.interfaces.IUserService;
-import com.crisdevApps.Nebra.services.interfaces.SessionRepository;
+import com.crisdevApps.Nebra.repositories.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Transactional
