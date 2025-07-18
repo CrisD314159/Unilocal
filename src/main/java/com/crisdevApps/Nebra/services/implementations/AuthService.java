@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -73,6 +74,37 @@ public class AuthService implements IAuthService {
         Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
         if(sessionOptional.isEmpty()) throw new EntityNotFoundException("Session not found");
         sessionRepository.delete(sessionOptional.get());
+    }
+
+    @Override
+    public TokenDTO RefreshToken(String refresh) {
+        UUID sessionId = jwtUtil.GetSessionIdFromRefreshToken(refresh);
+        if(sessionId == null) {
+            throw new ValidationException("Invalid refresh token");
+        }
+
+        Session session = sessionRepository.findById(sessionId).orElseThrow(
+                ()-> new EntityNotFoundException("Session not found")
+        );
+
+        if(session.getExpiresAt().isBefore(LocalDateTime.now())) {
+            sessionRepository.delete(session);
+            throw new UnauthorizedException("Session expired");
+        }
+
+        User sessionUser = session.getUser();
+        if (Duration.between(LocalDateTime.now(), session.getExpiresAt()).toDays() <= 2) {
+            session.setExpiresAt(LocalDateTime.now().plusDays(7));
+            sessionRepository.save(session);
+            String token = jwtUtil.GenerateToken(sessionUser.getId(), sessionUser.getEmail(), false, null, sessionUser.getUserRole());
+            String refreshToken = jwtUtil.GenerateToken(sessionUser.getId(), sessionUser.getEmail(),
+                    true, session.getId().toString(), sessionUser.getUserRole());
+
+            return new TokenDTO(token, refreshToken);
+        }else{
+            String token = jwtUtil.GenerateToken(sessionUser.getId(), sessionUser.getEmail(), false, null, sessionUser.getUserRole());
+            return new TokenDTO(token, null);
+        }
     }
 
 

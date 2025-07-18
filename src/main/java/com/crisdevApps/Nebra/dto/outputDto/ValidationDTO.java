@@ -1,6 +1,6 @@
 package com.crisdevApps.Nebra.dto.outputDto;
 
-public record ValidacionDTO(
+public record ValidationDTO(
         String campo,
         String error
 ) {

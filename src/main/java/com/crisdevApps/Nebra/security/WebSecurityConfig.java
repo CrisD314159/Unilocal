@@ -38,10 +38,12 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain (HttpSecurity security) throws Exception {
             security.csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(auth ->{
-                        auth.requestMatchers("auth/login", "user/signup")
+                        auth.requestMatchers("api/users/create", "api/comments/business-comments/",
+                                        "api/business/search", "api/business/category", "api/business/near",
+                                        "api/auth/login", "api/auth/logout", "api//auth/refresh",
+                                        "api/account/changePassword", "api/account/sendRecoveryLink", "api/account/verifyAccount")
                                 .permitAll().anyRequest().authenticated();
                     })
-                    //TODO: Oauth insertion
                     .oauth2Login( login -> {
                         login.successHandler(oAuthSuccessHandler);
                         login.failureHandler(oAuthFailureHandler);

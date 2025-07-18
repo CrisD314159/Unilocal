@@ -109,7 +109,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<GetUserProfileDTO> GetUsers(String search, int page) {
+    public List<GetUserProfileDTO> SearchUsers(String search, int page) {
         Pageable pageable = PageRequest.of(page, 10);
         Page<User> users = userRepository.findByNameIsLikeAndUserState(search, UserState.ACTIVE, pageable);
 

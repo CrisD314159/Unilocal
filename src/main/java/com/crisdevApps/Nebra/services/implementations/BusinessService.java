@@ -1,9 +1,7 @@
 package com.crisdevApps.Nebra.services.implementations;
 
-import com.crisdevApps.Nebra.dto.inputDto.StoreBusinessImagesDTO;
 import com.crisdevApps.Nebra.dto.inputDto.UpdateBusinessDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CreateBusinessDTO;
-import com.crisdevApps.Nebra.dto.inputDto.CrearRevisionDTO;
 import com.crisdevApps.Nebra.dto.outputDto.*;
 import com.crisdevApps.Nebra.exceptions.EntityNotFoundException;
 import com.crisdevApps.Nebra.exceptions.ValidationException;
@@ -25,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,14 +58,17 @@ public class BusinessService implements IBusinessService {
     }
 
     @Override
-    public void StoreBusinessImages(StoreBusinessImagesDTO storeBusinessImagesDTO) {
-        Business business = GetValidBusiness(storeBusinessImagesDTO.businessId());
+    public void StoreBusinessImages(List<MultipartFile> photos, UUID businessId, UUID userId) {
+        Business business = GetValidBusiness(businessId);
+
+        if(!business.getUserOwner().getId().equals(userId))
+            throw new ValidationException("You are not his business owner");
 
         if(!business.getImages().isEmpty()){
             imageService.DeleteSeveral(business.getImages());
         }
 
-        List<Image> imagesUploaded = imageService.UploadSeveralImages(storeBusinessImagesDTO.images());
+        List<Image> imagesUploaded = imageService.UploadSeveralImages(photos);
         business.setImages(imagesUploaded);
         businessRepository.save(business);
 
@@ -129,9 +131,9 @@ public class BusinessService implements IBusinessService {
     }
 
     @Override
-    public List<GetBusinessDTO> GetUserArchivedBusiness(int page){
+    public List<GetBusinessDTO> GetUserArchivedBusiness(int page, UUID userId){
         Pageable pageable = PageRequest.of(page, 10);
-        Page<Business> businessPage = businessRepository.findByBusinessState(BusinessState.ARCHIVED, pageable);
+        Page<Business> businessPage = businessRepository.findByBusinessStateAndUserOwner_Id(BusinessState.ARCHIVED, userId, pageable);
 
         return businessPage.stream().map(business -> {
             int score = commentService.CalculateBusinessAverageScore(business.getId());
@@ -163,6 +165,11 @@ public class BusinessService implements IBusinessService {
             int score = commentService.CalculateBusinessAverageScore(business.getId());
             return businessMapper.toDTO(business, score);
         }).toList();
+    }
+
+    @Override
+    public List<GetBusinessDTO> GetNearBusiness(String latitude, String longitude) {
+        return List.of();
     }
 
 

@@ -7,9 +7,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IAuthService {
-    TokenDTO Login(LoginDTO loginDTO) throws Exception;
+    TokenDTO Login(LoginDTO loginDTO);
 
     String CreateSession(User user);
 
     void Logout(String refresh);
+
+    TokenDTO RefreshToken(String refresh);
 }

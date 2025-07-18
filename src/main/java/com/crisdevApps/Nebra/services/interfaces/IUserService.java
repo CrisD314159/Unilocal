@@ -3,8 +3,6 @@ package com.crisdevApps.Nebra.services.interfaces;
 import com.crisdevApps.Nebra.dto.inputDto.UpdateUserDTO;
 import com.crisdevApps.Nebra.dto.inputDto.CreateUserDTO;
 import com.crisdevApps.Nebra.dto.outputDto.GetUserProfileDTO;
-import com.crisdevApps.Nebra.dto.outputDto.ItemUsuarioDTO;
-import com.crisdevApps.Nebra.dto.outputDto.ObtenerNegocioDTO;
 import com.crisdevApps.Nebra.model.User;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +19,7 @@ public interface IUserService{
 
     GetUserProfileDTO GetUserProfile(UUID userId);
 
-    List<GetUserProfileDTO> GetUsers(String search, int page);
+    List<GetUserProfileDTO> SearchUsers(String search, int page);
 
     User FindValidUserByEmail(String email);
 

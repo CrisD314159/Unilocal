@@ -10,7 +10,6 @@ import java.util.UUID;
 
 public record CreateCommentDTO(
        @NotEmpty UUID id,
-       @NotBlank UUID userId,
        @NotBlank String title,
        @NotBlank @Length(max = 200) String content,
        @PositiveOrZero @Max(5) int score

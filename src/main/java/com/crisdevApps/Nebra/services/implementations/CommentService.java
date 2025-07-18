@@ -37,9 +37,9 @@ public class CommentService implements ICommentService {
     private final CommentMapper commentMapper;
     private final IBusinessService businessService;
     @Override
-    public void CreateComment(CreateCommentDTO createCommentDTO) throws Exception {
+    public void CreateComment(CreateCommentDTO createCommentDTO, UUID authorId) {
         Business business = businessService.GetValidBusiness(createCommentDTO.id());
-        User user = userService.FindValidUserById(createCommentDTO.userId());
+        User user = userService.FindValidUserById(authorId);
 
         if(business.getUserOwner().getId().equals(user.getId()))
             throw new ValidationException("You cannot comment your own business");

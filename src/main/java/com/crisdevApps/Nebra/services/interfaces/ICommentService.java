@@ -11,11 +11,11 @@ import java.util.UUID;
 
 @Repository
 public interface ICommentService {
-    void CreateComment(CreateCommentDTO createCommentDTO) throws Exception;
+    void CreateComment(CreateCommentDTO createCommentDTO, UUID authorId);
 
-    void AnswerComment(AnswerCommentDTO answerCommentDTO, UUID userId) throws Exception;
+    void AnswerComment(AnswerCommentDTO answerCommentDTO, UUID userId);
 
-    List<GetCommentDTO> GetBusinessComments(UUID businessId, int page) throws Exception;
+    List<GetCommentDTO> GetBusinessComments(UUID businessId, int page) ;
 
     int CalculateBusinessAverageScore(UUID businessId);
 

@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.UUID;
 
 public record CreateReportDTO(
-        @NotEmpty UUID userId,
         @NotEmpty UUID businessId,
         @NotBlank @Max(200) String reason
 ) {

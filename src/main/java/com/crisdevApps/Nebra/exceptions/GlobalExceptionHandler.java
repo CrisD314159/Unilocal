@@ -1,7 +1,7 @@
 package com.crisdevApps.Nebra.exceptions;
 
 import com.crisdevApps.Nebra.dto.outputDto.ErrorMessage;
-import com.crisdevApps.Nebra.dto.outputDto.ValidacionDTO;
+import com.crisdevApps.Nebra.dto.outputDto.ValidationDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -23,12 +23,12 @@ public class GlobalExceptionHandler {
         );
     }
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorMessage<List<ValidacionDTO>>> validationException(
+    public ResponseEntity<ErrorMessage<List<ValidationDTO>>> validationException(
             MethodArgumentNotValidException ex ) {
-        List<ValidacionDTO> errores = new ArrayList<>();
+        List<ValidationDTO> errores = new ArrayList<>();
         BindingResult results = ex.getBindingResult();
         for (FieldError e: results.getFieldErrors()) {
-            errores.add( new ValidacionDTO(e.getField(), e.getDefaultMessage()) );
+            errores.add( new ValidationDTO(e.getField(), e.getDefaultMessage()) );
         }
         return ResponseEntity.badRequest().body( new ErrorMessage<>(true, errores) );
     }

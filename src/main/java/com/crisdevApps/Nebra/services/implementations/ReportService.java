@@ -23,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,9 +38,9 @@ public class ReportService implements IReportService {
     private final ReportMapper reportMapper;
     private final IUserService userService;
     @Override
-    public void CreateReport(CreateReportDTO createReportDTO) {
+    public void CreateReport(CreateReportDTO createReportDTO, UUID authorId) {
         Business business = businessService.GetValidBusiness(createReportDTO.businessId());
-        User user = userService.FindValidUserById(createReportDTO.userId());
+        User user = userService.FindValidUserById(authorId);
         Report report = Report.builder()
                 .reportState(ReportState.PENDING)
                 .answer("")
@@ -54,16 +53,8 @@ public class ReportService implements IReportService {
 
     @Override
     public void AcceptReport(UUID reportId, UUID userId) {
-        User user = userService.FindValidUserById(userId);
-        if(user.getUserRole().equals(UserRole.USER))
-            throw new ValidationException("You are not authorized to execute this action");
+        Report report =  getValidReport(reportId, userId);;
 
-        Optional<Report> denunciaOptional = reportRepository.findByIdAndReportState(reportId, ReportState.PENDING);
-        if (denunciaOptional.isEmpty()){
-            throw new EntityNotFoundException("Report not found");
-        }
-
-        Report report = denunciaOptional.get();
         Business reportBusiness = report.getBusiness();
         if(reportBusiness.getBusinessState() != BusinessState.ACTIVE)
             throw new ValidationException("Business not found");
@@ -93,13 +84,9 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public void RejectReport(UUID reportId){
-        Optional<Report> denunciaOptional = reportRepository.findByIdAndReportState(reportId, ReportState.PENDING);
-        if (denunciaOptional.isEmpty()){
-            throw new EntityNotFoundException("Report not found");
-        }
+    public void RejectReport(UUID reportId, UUID userId){
 
-        Report report = denunciaOptional.get();
+        Report report =  getValidReport(reportId, userId);;
 
         report.setReportState(ReportState.REJECTED);
 
@@ -113,6 +100,19 @@ public class ReportService implements IReportService {
                 "",
                 "Go to Nebra"
         ), "templates/generalEmailTemplate.html", false);
+    }
+
+    private Report getValidReport(UUID reportId, UUID userId) {
+        User user = userService.FindValidUserById(userId);
+        if(user.getUserRole().equals(UserRole.USER))
+            throw new ValidationException("You are not authorized to execute this action");
+
+        Optional<Report> reportOptional = reportRepository.findByIdAndReportState(reportId, ReportState.PENDING);
+        if (reportOptional.isEmpty()){
+            throw new EntityNotFoundException("Report not found");
+        }
+
+        return reportOptional.get();
     }
 
     @Override

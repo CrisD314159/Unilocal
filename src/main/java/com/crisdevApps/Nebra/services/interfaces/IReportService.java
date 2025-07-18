@@ -20,11 +20,11 @@ import java.util.UUID;
 @Repository
 public interface IReportService {
 
-    void CreateReport(CreateReportDTO createReportDTO);
+    void CreateReport(CreateReportDTO createReportDTO, UUID authorId);
 
     void AcceptReport(UUID reportId, UUID userId);
 
-    void RejectReport(UUID reportId);
+    void RejectReport(UUID reportId, UUID userId);
 
     List<GetReportDTO> GetPendingReports(int page);
 
